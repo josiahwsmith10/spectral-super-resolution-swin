@@ -9,11 +9,9 @@ Experiments for SwinFreq paper.
 
 - Experiment 3: comparison of sidelobes
 
-- Experiment 4: UTD
-    TODO: create code for this experiment
-
-- Experiment 5: spinning point scatterers
-    TODO: create code for this experiment
+- Experiment 4: spinning point scatterers
+    
+- Experiment 5: real Boeing data
 
 """
 
@@ -27,27 +25,32 @@ from paper_results import (
     experiment1,
     experiment2,
     experiment3,
-    #experiment4,
-    #experiment5
+    experiment4,
+    experiment5,
 )
+
 
 def main():
     args = setup()
-    
+
     create_methods(args)
-    
+
     experiment0(args)
-    
-    #experiment1(args)
-    
-    #experiment2(args)
-    
+
+    experiment1(args)
+
+    experiment2(args)
+
     experiment3(args)
+
+    experiment4(args)
+
+    experiment5(args)
 
 
 def setup():
     parser = argparse.ArgumentParser()
-    
+
     # methods to compare performance for experiments
     parser.add_argument(
         "--method_list",
@@ -55,16 +58,16 @@ def setup():
         type=str,
         default=[
             "Periodogram",
-            #"MUSIC",
-            #"OMP",
+            "MUSIC",
+            "OMP",
             "saved/models/cresfreq.pth",
             "saved/models/cvswinfreq222.pth",
-            #"saved/models/cvswinfreq444.pth",
+            # "saved/models/cvswinfreq444.pth",
             "saved/models/swinfreq444.pth",
         ],
         help="methods to use (use path to checkpoint for ML models)",
     )
-    
+
     # experiment 1 settings
     parser.add_argument(
         "--snr_list",
@@ -104,7 +107,7 @@ def setup():
         default=20,
         help="m=param parameter for source number calculation",
     )
-    
+
     # experiment 2 settings
     parser.add_argument(
         "--res_list",
@@ -125,7 +128,7 @@ def setup():
         default=1000,
         help="number of samples used in experiment 2 per resolution spacing",
     )
-    
+
     # experiment 3
     parser.add_argument(
         "--sidelobes_snr",
@@ -146,15 +149,28 @@ def setup():
         default=10,
         help="number of samples used in experiment 3 per SNR value",
     )
-    
+
     # experiment 4
+    parser.add_argument(
+        "--exp4_data_path",
+        type=str,
+        default="paper_results\paper_data\spinningtarget.mat",
+        help="path for file to read for experiment 4",
+    )
+
     # experiment 5
+    parser.add_argument(
+        "--exp5_data_path",
+        type=str,
+        default="paper_results\paper_data\B727r.mat",
+        help="path for file to read for experiment 5",
+    )
 
     # cuda parameters
     parser.add_argument(
         "--no_cuda", action="store_true", help="avoid using CUDA when available"
     )
-    
+
     # dataset parameters
     parser.add_argument(
         "--batch_size", type=int, default=256, help="batch size used during testing"
@@ -193,9 +209,12 @@ def setup():
         "--floor_amplitude", type=float, default=0.1, help="minimum amplitude of spikes"
     )
     parser.add_argument(
-        "--noise", type=str, default="gaussian_blind_contsant", help="kind of noise to use"
+        "--noise",
+        type=str,
+        default="gaussian_blind_contsant",
+        help="kind of noise to use",
     )
-    
+
     # kernel parameters used to generate the ideal frequency representation
     parser.add_argument(
         "--kernel_type",
@@ -215,10 +234,10 @@ def setup():
         default=0.12,
         help="std of the gaussian kernel normalized by signal_dim",
     )
-    
+
     # seeding parameters
-    parser.add_argument("--numpy_seed", type=int, default=100) # original=100
-    parser.add_argument("--torch_seed", type=int, default=76) # original=76
+    parser.add_argument("--numpy_seed", type=int, default=100)  # original=100
+    parser.add_argument("--torch_seed", type=int, default=76)  # original=76
 
     args = parser.parse_args()
 
