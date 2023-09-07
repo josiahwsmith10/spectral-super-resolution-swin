@@ -13,7 +13,7 @@ import util
 
 
 def create_sidelobe_data(snr, args):
-    clean_signals, _, _ = gen_signal(
+    clean_signals, f, nfreq = gen_signal(
         num_samples=args.exp3_num_samples,
         signal_dim=args.signal_dim,
         num_freq=args.sidelobes_max_n_freq,
@@ -27,15 +27,17 @@ def create_sidelobe_data(snr, args):
 
     noisy_signals = noise_torch(clean_signals, snr, "gaussian_blind_constant")
     
-    return noisy_signals
+    return noisy_signals, f, nfreq
 
 
 def create_data(args):
     data = {}
+    f = {}
+    nfreq = {}
     print("Creating data...")
     for snr in args.sidelobes_snr:
-        data[snr] = create_sidelobe_data(snr, args)
-    return data
+        data[snr], f[snr], nfreq[snr] = create_sidelobe_data(snr, args)
+    return data, f, nfreq
 
 
 def get_results(args, data):
@@ -49,7 +51,7 @@ def get_results(args, data):
     return results
 
 
-def save_results(args, results):    
+def save_results(args, results, f, nfreq):    
     snr = np.array(args.sidelobes_snr).reshape(-1, 1)
     save_dict = {"snr": snr}
     
@@ -57,6 +59,12 @@ def save_results(args, results):
         save_dict[method] = np.zeros((args.fr_size, args.exp3_num_samples, len(args.sidelobes_snr)))
         for i, snr_i in enumerate(args.sidelobes_snr):
             save_dict[method][:, :, i] = results[method][snr_i].detach().cpu().numpy().T
+            
+    save_dict["f"] = np.zeros((args.exp3_num_samples, args.sidelobes_max_n_freq, len(args.sidelobes_snr)))
+    save_dict["nfreq"] = np.zeros((args.exp3_num_samples, len(args.sidelobes_snr)))
+    for i, snr_i in enumerate(args.sidelobes_snr):
+        save_dict["f"][:, :, i] = f[snr_i]
+        save_dict["nfreq"][:, i] = nfreq[snr_i]
     
     savemat("./paper_results/exp3.mat", save_dict)
 
@@ -65,10 +73,10 @@ def experiment3(args):
     print("Starting experiment 3...")
     
     # Create data for all methods
-    data = create_data(args)
+    data, f, nfreq = create_data(args)
     
     # Get results
     results = get_results(args, data)
     
     # Save results
-    save_results(args, results)
+    save_results(args, results, f, nfreq)

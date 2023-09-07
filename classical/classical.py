@@ -13,7 +13,9 @@ class Periodogram(nn.Module):
     def cuda(self):
         super().cuda()
         
-        self.xgrid.cuda()
+        self.xgrid = self.xgrid.cuda()
+        
+        return self
         
     def forward(self, x: torch.Tensor):
         x = x[:, 0] + 1j*x[:, 1]
@@ -39,7 +41,9 @@ class MUSIC(nn.Module):
     def cuda(self):
         super().cuda()
         
-        self.xgrid.cuda()
+        self.xgrid = self.xgrid.cuda()
+        
+        return self
         
     def forward(self, x: torch.Tensor):
         x = x[:, 0] + 1j*x[:, 1]
@@ -79,7 +83,9 @@ class OMP(nn.Module):
     def cuda(self):
         super().cuda()
         
-        self.D.cuda()
+        self.D = self.D.cuda()
+        
+        return self
         
     def forward(self, x):
         x = x[:, 0] + 1j*x[:, 1]

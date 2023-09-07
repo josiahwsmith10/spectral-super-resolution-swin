@@ -81,7 +81,7 @@ def periodogram_torch(signal, xgrid):
     Courtesy of: https://github.com/sreyas-mohan/DeepFreq
     Compute periodogram.
     """
-    js = torch.arange(signal.shape[1])
+    js = torch.arange(signal.shape[1], device=xgrid.device)
     return (
         torch.abs(
             torch.exp(-2.0j * np.pi * xgrid[:, None] * js) @ signal.T / signal.shape[1]
@@ -141,13 +141,14 @@ def music_torch(signal, xgrid, nfreq, m=20):
     Modified from: https://github.com/sreyas-mohan/DeepFreq
     Compute frequency representation obtained with MUSIC.
     """
-    music_fr = torch.zeros((signal.shape[0], len(xgrid)))
+    device = signal.device
+    music_fr = torch.zeros((signal.shape[0], len(xgrid)), device=device)
     
     # Precompute to save time
     v = torch.exp(
         -2.0j
         * torch.pi
-        * torch.outer(xgrid, torch.arange(0, signal.shape[1] - m + 1))
+        * torch.outer(xgrid, torch.arange(0, signal.shape[1] - m + 1, device=device))
     )
     
     for n in range(signal.shape[0]):
@@ -174,16 +175,18 @@ def omp_torch(D, X, L):
         A (torch.Tensor): sparse coefficients matrix
     """
     
+    device = D.device
+    
     _, P = X.shape
     _, K = D.shape # D.shape = (n, K)
     
-    A = torch.zeros(K, P, dtype=torch.cfloat)
+    A = torch.zeros(K, P, dtype=torch.cfloat, device=device)
     
     for k in range(P):
         a = []
         x = X[:, k]             # k-th signal sample
         residual = x            # initialize the residual vector
-        indx = torch.zeros(L[k], dtype=int)   # initialize the index vector
+        indx = torch.zeros(L[k], dtype=int, device=device)   # initialize the index vector
         
         for j in range(L[k]):
             # compute the inner product
@@ -197,7 +200,7 @@ def omp_torch(D, X, L):
             # compute the residual in the new dictionary
             residual = x - D[:, indx[:(j+1)]] @ a
             
-        temp = torch.zeros(K, dtype=torch.cfloat)
+        temp = torch.zeros(K, dtype=torch.cfloat, device=device)
         temp[indx[:(j+1)]] = a
         A[:, k] = temp
         

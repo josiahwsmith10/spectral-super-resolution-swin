@@ -8,7 +8,6 @@ Experiments for SwinFreq paper.
 - Experiment 2: resolution capability
 
 - Experiment 3: comparison of sidelobes
-    TODO: create code for this experiment
 
 - Experiment 4: UTD
     TODO: create code for this experiment
@@ -39,11 +38,11 @@ def main():
     
     experiment0(args)
     
-    experiment1(args)
+    #experiment1(args)
     
     #experiment2(args)
     
-    #experiment3(args)
+    experiment3(args)
 
 
 def setup():
@@ -56,11 +55,11 @@ def setup():
         type=str,
         default=[
             "Periodogram",
-            "MUSIC",
-            "OMP",
+            #"MUSIC",
+            #"OMP",
             "saved/models/cresfreq.pth",
             "saved/models/cvswinfreq222.pth",
-            "saved/models/cvswinfreq444.pth",
+            #"saved/models/cvswinfreq444.pth",
             "saved/models/swinfreq444.pth",
         ],
         help="methods to use (use path to checkpoint for ML models)",
@@ -71,7 +70,7 @@ def setup():
         "--snr_list",
         nargs="+",
         type=int,
-        default=[10], #[-10, 0, 10, 20, 30, 40],
+        default=[-10, 0, 10, 20, 30, 40],
         help="SNR values in dB for comparing numerical performance",
     )
     parser.add_argument(
@@ -111,7 +110,7 @@ def setup():
         "--res_list",
         nargs="+",
         type=int,
-        default=[1], #np.linspace(0.3, 1.0, 100),
+        default=np.linspace(0.3, 1.0, 100),
         help="resolution spacing for computing resolution capability (x/N)",
     )
     parser.add_argument(
