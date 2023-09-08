@@ -39,7 +39,7 @@ class MLP(nn.Module):
 def window_partition1d(x, window_size):
     """
     Modified for 1-D tensor data.
-    
+
     Args:
         x: (B, N, C)
         window_size (int): window size
@@ -54,7 +54,7 @@ def window_partition1d(x, window_size):
 def window_reverse1d(windows, window_size, N):
     """
     Modified for 1-D tensor data.
-    
+
     Args:
         windows: (B*num_windows, window_size, C)
         window_size (int): Window size
@@ -135,19 +135,19 @@ class WindowAttention1d(nn.Module):
             qkv[0],
             qkv[1],
             qkv[2],
-        ) # B_, num_heads, window_size, C//num_heads
+        )  # B_, num_heads, window_size, C//num_heads
 
         q = q * self.scale
-        attn = q @ k.transpose(-2, -1) # B_, num_heads, window_size, window_size
+        attn = q @ k.transpose(-2, -1)  # B_, num_heads, window_size, window_size
 
         relative_position_bias = self.relative_position_bias_table[
             self.relative_position_index.view(-1)
         ].view(
             window_size, window_size, self.num_heads
-        ) # window_size, window_size, num_heads
+        )  # window_size, window_size, num_heads
         relative_position_bias = relative_position_bias.permute(
             2, 0, 1
-        ) # num_heads, window_size, window_size
+        )  # num_heads, window_size, window_size
         attn = attn + relative_position_bias.unsqueeze(0)
 
         if mask is not None:
@@ -156,7 +156,7 @@ class WindowAttention1d(nn.Module):
                 B_ // num_windows, num_windows, self.num_heads, window_size, window_size
             ) + mask.unsqueeze(1).unsqueeze(0)
             attn = attn.view(-1, self.num_heads, window_size, window_size)
-            
+
         attn = self.softmax(attn)
         attn = self.attn_drop(attn)
 
@@ -253,7 +253,7 @@ class SwinTransformerBlock1d(nn.Module):
             act_layer=act_layer,
             drop=drop,
         )
-        
+
         if optional_relu:
             self.relu = nn.ReLU()
         else:
@@ -279,13 +279,13 @@ class SwinTransformerBlock1d(nn.Module):
             img_mask[:, s, :] = cnt
             cnt += 1
 
-        mask_windows = window_partition1d(
-            img_mask, self.window_size
-        ).view(-1, self.window_size)  # nW, window_size
+        mask_windows = window_partition1d(img_mask, self.window_size).view(
+            -1, self.window_size
+        )  # nW, window_size
         attn_mask = mask_windows.unsqueeze(1) - mask_windows.unsqueeze(2)
         attn_mask = attn_mask.masked_fill(attn_mask != 0, float(-100.0)).masked_fill(
             attn_mask == 0, float(0.0)
-        ) # num_windows, window_size, window_size
+        )  # num_windows, window_size, window_size
 
         return attn_mask
 
@@ -297,7 +297,7 @@ class SwinTransformerBlock1d(nn.Module):
 
         # cyclic shift
         if self.shift_size > 0:
-            shifted_x = torch.roll(x, shifts=-self.shift_size, dims=1) # B, N', C
+            shifted_x = torch.roll(x, shifts=-self.shift_size, dims=1)  # B, N', C
         else:
             shifted_x = x
 
@@ -322,7 +322,7 @@ class SwinTransformerBlock1d(nn.Module):
 
         # reverse cyclic shift
         if self.shift_size > 0:
-            shifted_x = torch.roll(x, shifts=self.shift_size, dims=1) # B, N, C
+            shifted_x = torch.roll(x, shifts=self.shift_size, dims=1)  # B, N, C
         else:
             x = shifted_x
 
@@ -548,21 +548,14 @@ class RSTB1d(nn.Module):
 
     def forward(self, x):
         return (
-            self.patch_embed(
-                self.conv(
-                    self.patch_unembed(
-                        self.residual_group(x)
-                    )
-                )
-            )
-            + x
+            self.patch_embed(self.conv(self.patch_unembed(self.residual_group(x)))) + x
         )
 
     def flops(self):
         flops = 0
         flops += self.residual_group.flops()
         N = self.input_resolution
-        flops += N * self.dim * self.dim * 9 # TODO: why 9?
+        flops += N * self.dim * self.dim * 9  # TODO: why 9?
         flops += self.patch_embed.flops()
         flops += self.patch_unembed.flops()
 
@@ -585,7 +578,7 @@ class PatchEmbed1d(nn.Module):
     ):
         super().__init__()
         patches_resolution = img_size // patch_size
-        
+
         self.img_size = img_size
         self.patch_size = patch_size
         self.patches_resolution = patches_resolution
@@ -636,7 +629,7 @@ class PatchUnEmbed1d(nn.Module):
     ):
         super().__init__()
         patches_resolution = img_size // patch_size
-        
+
         self.img_size = img_size
         self.patch_size = patch_size
         self.patches_resolution = patches_resolution
@@ -653,7 +646,7 @@ class PatchUnEmbed1d(nn.Module):
         Returns:
             x: (B, C, N)
         """
-        return x.transpose(1, 2) # (B, C, N)
+        return x.transpose(1, 2)  # (B, C, N)
 
     def flops(self):
         flops = 0

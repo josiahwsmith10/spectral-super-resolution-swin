@@ -1,18 +1,11 @@
 """
 Experiments for SwinFreq paper. 
-
 - Experiment 0: number of parameters
-
 - Experiment 1: PSNR / SSIM across SNR
-
 - Experiment 2: resolution capability
-
 - Experiment 3: comparison of sidelobes
-
 - Experiment 4: spinning point scatterers
-    
 - Experiment 5: real Boeing data
-
 """
 
 import numpy as np
@@ -34,17 +27,12 @@ def main():
     args = setup()
 
     create_methods(args)
-
+    
     experiment0(args)
-
-    experiment1(args)
-
-    experiment2(args)
-
-    experiment3(args)
-
-    experiment4(args)
-
+    #experiment1(args)
+    #experiment2(args)
+    #experiment3(args)
+    #experiment4(args)
     experiment5(args)
 
 
@@ -98,7 +86,7 @@ def setup():
     parser.add_argument(
         "--source_number_method",
         type=str,
-        default="AIC",
+        default="SORTE",
         help="method to estimate number of frequencies in MUSIC & OMP",
     )
     parser.add_argument(

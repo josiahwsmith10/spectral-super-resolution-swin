@@ -6,11 +6,11 @@ def noise_torch(t, snr=-10.0, kind="gaussian_blind_constant", n_corr=None, args=
     """
     Modified from : https://github.com/sreyas-mohan/DeepFreq
     """
-    
+
     if args is not None:
         snr = args.snr
         kind = args.noise
-    
+
     kind = kind.lower()
     if kind == "gaussian":
         return gaussian_noise(t, snr)
@@ -29,9 +29,7 @@ def noise_torch(t, snr=-10.0, kind="gaussian_blind_constant", n_corr=None, args=
     elif kind == "variable_sparse":
         return variable_sparse_noise(t, n_corr)
     else:
-        raise NotImplementedError(
-            f"{kind} noise type not implemented!"
-        )
+        raise NotImplementedError(f"{kind} noise type not implemented!")
 
 
 def gaussian_noise(s, snr):
@@ -86,9 +84,9 @@ def gaussian_blind_noise_cresfreq(s, snr):
 
 
 def gaussian_blind_noise_constant(s, snr):
-    s_iq = s[:, 0] + 1j*s[:, 1]
+    s_iq = s[:, 0] + 1j * s[:, 1]
     s_power = s_iq.abs().pow(2).mean(dim=1, keepdim=True)
-    snr_linear = 10**(snr/10)
+    snr_linear = 10 ** (snr / 10)
     sigma = (s_power / (snr_linear * 2)).sqrt()
     noise = sigma * torch.randn(s_iq.shape, device=s.device, dtype=torch.cfloat)
     s[:, 0] += noise.real
@@ -98,12 +96,14 @@ def gaussian_blind_noise_constant(s, snr):
 
 def gaussian_blind_noise_batch(s, snr_min_max=[-10, 40]):
     bsz = s.shape[0]
-    s_iq = s[:, 0] + 1j*s[:, 1]
+    s_iq = s[:, 0] + 1j * s[:, 1]
     s_power = s_iq.abs().pow(2).mean(dim=1, keepdim=True)
     snr_db_array = (
-        snr_min_max[0] + (snr_min_max[1] - snr_min_max[0]
-    ) * torch.rand(bsz, device=s.device, dtype=s.dtype))[:, None]
-    snr_array = 10**(snr_db_array/10)
+        snr_min_max[0]
+        + (snr_min_max[1] - snr_min_max[0])
+        * torch.rand(bsz, device=s.device, dtype=s.dtype)
+    )[:, None]
+    snr_array = 10 ** (snr_db_array / 10)
     sigma = (s_power / (snr_array * 2)).sqrt()
     noise = sigma * torch.randn(s_iq.shape, device=s.device, dtype=torch.cfloat)
     s[:, 0] += noise.real
@@ -118,8 +118,10 @@ def gaussian_blind_noise_batch_strict(s, snr_min_max=[-10, 40]):
     mult = torch.norm(s, 2, dim=1) / torch.norm(noise, 2, dim=1)
     noise *= mult[:, None]
     snr_array = (
-        snr_min_max[0] + (snr_min_max[1] - snr_min_max[0]
-    ) * torch.rand(bsz, device=s.device, dtype=s.dtype))[:, None]
+        snr_min_max[0]
+        + (snr_min_max[1] - snr_min_max[0])
+        * torch.rand(bsz, device=s.device, dtype=s.dtype)
+    )[:, None]
     s = (s * (10 ** (snr_array / 20))).to(s.device)
     return (s + noise).view(bsz, -1, signal_dim)
 

@@ -117,8 +117,8 @@ def gen_signal(
 
 def res_freq(f, d_sep):
     max_freq = 0.5 - d_sep
-    
-    f[0] = -0.5 + (0.5 + max_freq)*np.random.rand()
+
+    f[0] = -0.5 + (0.5 + max_freq) * np.random.rand()
     f[1] = f[0] + d_sep
 
 
@@ -133,10 +133,10 @@ def gen_signal_res(
     Modified from: https://github.com/sreyas-mohan/DeepFreq
     Generates randomly placed frequencies with constant separation.
     """
-    
+
     # Always use 2 frequencies
     num_freq = 2
-    
+
     s = np.zeros((num_samples, 2, signal_dim))
     xgrid = np.arange(signal_dim)[:, None]
     f = np.ones((num_samples, num_freq)) * np.inf

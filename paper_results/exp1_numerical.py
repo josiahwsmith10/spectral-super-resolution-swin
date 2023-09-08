@@ -33,9 +33,9 @@ def create_data_tuple(snr, args):
         kernel_param=kernel_param,
         xgrid=xgrid,
         snr=snr,
-        noise="gaussian_blind_constant"
+        noise="gaussian_blind_constant",
     )[:]
-    
+
     return noisy_signals, fr
 
 
@@ -43,7 +43,7 @@ def compute_metrics(model, data_tuple, args):
     x, y = data_tuple
     if is_ml_model(model):
         y_pred = util.test_basic_SR(model, x, args=args)
-    
+
     results = {}
     for metric in args.exp1_metrics_list:
         if metric.lower() == "psnr":
@@ -53,11 +53,15 @@ def compute_metrics(model, data_tuple, args):
         elif metric.lower() == "rmse":
             m = RMSE1d()
         if is_ml_model(model):
-            results[metric] = torch.tensor([m(b_pred, b) for b_pred, b in zip(y_pred, y)]).mean().round(decimals=3)
+            results[metric] = (
+                torch.tensor([m(b_pred, b) for b_pred, b in zip(y_pred, y)])
+                .mean()
+                .round(decimals=3)
+            )
         else:
             results[metric] = torch.tensor(torch.nan)
     return results
-        
+
 
 def create_data(args):
     data = {}
@@ -71,7 +75,7 @@ def get_results(args, data):
     results = {}
     for method, model in args.models.items():
         results[method] = {}
-        
+
         print(f"Computing metrics for method={method}")
         for snr in tqdm(args.snr_list):
             results[method][snr] = compute_metrics(model, data[snr], args)
@@ -84,33 +88,32 @@ def print_results(args, results):
         print(f"Metric: {metric}")
         snrs = np.array(args.snr_list).reshape(-1, 1)
         results_mat = np.zeros((snrs.size, len(args.methods)))
-        
+
         for i, method in enumerate(args.methods):
             save_dict[f"{metric}_{method}"] = np.zeros(snrs.shape[0])
             for j, snr in enumerate(args.snr_list):
                 results_mat[j, i] = results[method][snr][metric].detach().cpu().numpy()
                 save_dict[f"{metric}_{method}"][j] = results_mat[j, i]
-        
+
         table = np.hstack((snrs, results_mat))
         headers = ["SNR"] + args.methods
-        
+
         print(tabulate(table, headers=headers))
-        
-        
+
         df = pd.DataFrame(table, columns=headers)
         df.to_csv(f"./paper_results/exp1_{metric}.csv")
-    
+
     savemat("./paper_results/exp1.mat", save_dict)
 
 
 def experiment1(args):
     print("Starting experiment 1...")
-    
+
     # Create data for all methods
     data = create_data(args)
-    
+
     # Get results
     results = get_results(args, data)
-    
+
     # Print results
     print_results(args, results)

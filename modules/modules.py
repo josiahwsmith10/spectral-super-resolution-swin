@@ -1,5 +1,5 @@
 from .DeepFreq import FrequencyRepresentationModule, PSnet
-from .cResFreq import FrequencyRepresentationModule_skiplayer32, cResFreqFast 
+from .cResFreq import FrequencyRepresentationModule_skiplayer32, cResFreqFast
 from .SwinFreq import SwinFreq, CVSwinFreq
 
 
@@ -81,7 +81,7 @@ def select_model(args):
             mlp_ratio=args.fr_mlp_ratio,
             normalization=args.normalization,
             dropout=args.fr_dropout,
-            optional_relu=args.fr_optional_relu
+            optional_relu=args.fr_optional_relu,
         )
     elif args.fr_module_type.lower() == "cvswinfreq":
         assert (
@@ -100,7 +100,7 @@ def select_model(args):
             window_size=args.fr_window_size,
             mlp_ratio=args.fr_mlp_ratio,
             normalization=args.normalization,
-            dropout=args.fr_dropout
+            dropout=args.fr_dropout,
         )
     else:
         raise NotImplementedError(
@@ -108,5 +108,5 @@ def select_model(args):
         )
     if args.use_cuda:
         net.cuda()
-        
+
     return net

@@ -18,7 +18,9 @@ def get_results(args, data):
     results = {}
     for method, model in args.models.items():
         print(f"Computing SR line spectra for method={method}")
-        results[method] = torch.fft.fftshift(util.test_basic_SR(model, data, args), dim=1)
+        results[method] = torch.fft.fftshift(
+            util.test_basic_SR(model, data, args), dim=1
+        )
     return results
 
 

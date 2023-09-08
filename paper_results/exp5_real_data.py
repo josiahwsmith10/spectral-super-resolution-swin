@@ -2,7 +2,6 @@
 Experiment 5: Boeing 727 real data
 """
 
-import numpy
 import torch
 from scipy.io import loadmat, savemat
 

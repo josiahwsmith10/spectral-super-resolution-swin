@@ -12,10 +12,10 @@ import complextorch as cvtorch
 import complextorch.nn as cvnn
 
 from modules.SwinFreq.swin1d import (
-    window_partition1d, 
-    window_reverse1d, 
+    window_partition1d,
+    window_reverse1d,
     PatchEmbed1d,
-    PatchUnEmbed1d
+    PatchUnEmbed1d,
 )
 
 ACT = cvnn.CPReLU
@@ -116,19 +116,19 @@ class CVWindowAttention1d(nn.Module):
             qkv[0],
             qkv[1],
             qkv[2],
-        ) # B_, num_heads, window_size, C//num_heads
+        )  # B_, num_heads, window_size, C//num_heads
 
         q = q * self.scale
-        attn = q @ k.transpose(-2, -1) # B_, num_heads, window_size, window_size
+        attn = q @ k.transpose(-2, -1)  # B_, num_heads, window_size, window_size
 
         relative_position_bias = self.relative_position_bias_table[
             self.relative_position_index.view(-1)
         ].view(
             window_size, window_size, self.num_heads
-        ) # window_size, window_size, num_heads
+        )  # window_size, window_size, num_heads
         relative_position_bias = relative_position_bias.permute(
             2, 0, 1
-        ) # num_heads, window_size, window_size
+        )  # num_heads, window_size, window_size
         attn = attn + relative_position_bias.unsqueeze(0)
 
         if mask is not None:
@@ -137,7 +137,7 @@ class CVWindowAttention1d(nn.Module):
                 B_ // num_windows, num_windows, self.num_heads, window_size, window_size
             ) + mask.unsqueeze(1).unsqueeze(0)
             attn = attn.view(-1, self.num_heads, window_size, window_size)
-            
+
         attn = self.softmax(attn)
         attn = self.attn_drop(attn)
 
@@ -252,13 +252,13 @@ class CVSwinTransformerBlock1d(nn.Module):
             img_mask[:, s, :] = cnt
             cnt += 1
 
-        mask_windows = window_partition1d(
-            img_mask, self.window_size
-        ).view(-1, self.window_size)  # nW, window_size
+        mask_windows = window_partition1d(img_mask, self.window_size).view(
+            -1, self.window_size
+        )  # nW, window_size
         attn_mask = mask_windows.unsqueeze(1) - mask_windows.unsqueeze(2)
         attn_mask = attn_mask.masked_fill(attn_mask != 0, float(-100.0)).masked_fill(
             attn_mask == 0, float(0.0)
-        ) # num_windows, window_size, window_size
+        )  # num_windows, window_size, window_size
 
         return attn_mask
 
@@ -270,7 +270,7 @@ class CVSwinTransformerBlock1d(nn.Module):
 
         # cyclic shift
         if self.shift_size > 0:
-            shifted_x = cvtorch.roll(x, shifts=-self.shift_size, dims=1) # B, N', C
+            shifted_x = cvtorch.roll(x, shifts=-self.shift_size, dims=1)  # B, N', C
         else:
             shifted_x = x
 
@@ -295,7 +295,7 @@ class CVSwinTransformerBlock1d(nn.Module):
 
         # reverse cyclic shift
         if self.shift_size > 0:
-            shifted_x = cvtorch.roll(x, shifts=self.shift_size, dims=1) # B, N, C
+            shifted_x = cvtorch.roll(x, shifts=self.shift_size, dims=1)  # B, N, C
         else:
             x = shifted_x
 
@@ -358,7 +358,7 @@ class CVBasicLayer1d(nn.Module):
         qk_scale=None,
         drop=0.0,
         attn_drop=0.0,
-        norm_layer=cvnn.CVLayerNorm
+        norm_layer=cvnn.CVLayerNorm,
     ):
         super().__init__()
         self.dim = dim
@@ -495,7 +495,7 @@ class CVRSTB1d(nn.Module):
         flops = 0
         flops += self.residual_group.flops()
         N = self.input_resolution
-        flops += N * self.dim * self.dim * 9 # TODO: why 9?
+        flops += N * self.dim * self.dim * 9  # TODO: why 9?
         flops += self.patch_embed.flops()
         flops += self.patch_unembed.flops()
 

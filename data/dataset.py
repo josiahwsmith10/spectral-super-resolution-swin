@@ -177,26 +177,31 @@ def make_eval_data_v2(args):
         kernel_param = args.triangle_slope / args.signal_dim
     else:
         kernel_param = args.gaussian_std / args.signal_dim
-    
+
     datasets = []
-    for snr in range(args.min_snr_db, args.max_snr_db+1, args.step_snr_db):
+    for snr in range(args.min_snr_db, args.max_snr_db + 1, args.step_snr_db):
         print(f"Making eval dataset SNR (dB) = {snr}")
-        datasets.append(load_dataset_fixed_noise(
-            int(args.n_validation // ((args.max_snr_db - args.min_snr_db) / args.step_snr_db)),
-            signal_dim=args.signal_dim,
-            max_n_freq=args.max_n_freq,
-            min_sep=args.min_sep,
-            distance=args.distance,
-            amplitude=args.amplitude,
-            floor_amplitude=args.floor_amplitude,
-            kernel_type=args.kernel_type,
-            kernel_param=kernel_param,
-            xgrid=xgrid,
-            snr=snr,
-            noise="gaussian_blind_constant"
-        ))
-        
-    dataset =  data_utils.ConcatDataset(datasets=datasets)
+        datasets.append(
+            load_dataset_fixed_noise(
+                int(
+                    args.n_validation
+                    // ((args.max_snr_db - args.min_snr_db) / args.step_snr_db)
+                ),
+                signal_dim=args.signal_dim,
+                max_n_freq=args.max_n_freq,
+                min_sep=args.min_sep,
+                distance=args.distance,
+                amplitude=args.amplitude,
+                floor_amplitude=args.floor_amplitude,
+                kernel_type=args.kernel_type,
+                kernel_param=kernel_param,
+                xgrid=xgrid,
+                snr=snr,
+                noise="gaussian_blind_constant",
+            )
+        )
+
+    dataset = data_utils.ConcatDataset(datasets=datasets)
     return data_utils.DataLoader(dataset, batch_size=args.batch_size)
 
 
@@ -206,24 +211,29 @@ def make_test_data(args):
         kernel_param = args.triangle_slope / args.signal_dim
     else:
         kernel_param = args.gaussian_std / args.signal_dim
-    
+
     datasets = []
-    for snr in range(args.min_snr_db, args.max_snr_db+1, args.step_snr_db):
+    for snr in range(args.min_snr_db, args.max_snr_db + 1, args.step_snr_db):
         print(f"Making dataset SNR (dB) = {snr}")
-        datasets.append(load_dataset_fixed_noise(
-            int(args.n_testing // ((args.max_snr_db - args.min_snr_db) / args.step_snr_db)),
-            signal_dim=args.signal_dim,
-            max_n_freq=args.max_n_freq,
-            min_sep=args.min_sep,
-            distance=args.distance,
-            amplitude=args.amplitude,
-            floor_amplitude=args.floor_amplitude,
-            kernel_type=args.kernel_type,
-            kernel_param=kernel_param,
-            xgrid=xgrid,
-            snr=snr,
-            noise="gaussian_blind_constant"
-        ))
-        
-    dataset =  data_utils.ConcatDataset(datasets=datasets)
+        datasets.append(
+            load_dataset_fixed_noise(
+                int(
+                    args.n_testing
+                    // ((args.max_snr_db - args.min_snr_db) / args.step_snr_db)
+                ),
+                signal_dim=args.signal_dim,
+                max_n_freq=args.max_n_freq,
+                min_sep=args.min_sep,
+                distance=args.distance,
+                amplitude=args.amplitude,
+                floor_amplitude=args.floor_amplitude,
+                kernel_type=args.kernel_type,
+                kernel_param=kernel_param,
+                xgrid=xgrid,
+                snr=snr,
+                noise="gaussian_blind_constant",
+            )
+        )
+
+    dataset = data_utils.ConcatDataset(datasets=datasets)
     return data_utils.DataLoader(dataset, batch_size=args.batch_size)

@@ -87,7 +87,7 @@ def setup(experiment=None):
     parser.add_argument(
         "--no_cuda", action="store_true", help="avoid using CUDA when available"
     )
-    
+
     # dataset parameters
     parser.add_argument(
         "--batch_size", type=int, default=256, help="batch size used during training"
@@ -128,11 +128,15 @@ def setup(experiment=None):
     parser.add_argument(
         "--noise", type=str, default="gaussian_blind", help="kind of noise to use"
     )
-    parser.add_argument("--snr", type=float, default=-10, help="snr parameter used by cResFreq")
+    parser.add_argument(
+        "--snr", type=float, default=-10, help="snr parameter used by cResFreq"
+    )
     parser.add_argument("--min_snr_db", type=int, default=-10, help="minimum SNR in dB")
     parser.add_argument("--max_snr_db", type=int, default=40, help="maximum SNR in dB")
-    parser.add_argument("--step_snr_db", type=int, default=10, help="step size of SNR in dB")
-    
+    parser.add_argument(
+        "--step_snr_db", type=int, default=10, help="step size of SNR in dB"
+    )
+
     # kernel parameters used to generate the ideal frequency representation
     parser.add_argument(
         "--kernel_type",
@@ -152,7 +156,7 @@ def setup(experiment=None):
         default=0.3,
         help="std of the gaussian kernel normalized by signal_dim",
     )
-    
+
     # frequency-representation (fr) module parameters
     parser.add_argument(
         "--fr_module_type",
@@ -252,7 +256,7 @@ def setup(experiment=None):
         default=8,
         help="stride of the transposed convolution, upsampling * inner_dim = fr_size",
     )
-    
+
     # training parameters
     parser.add_argument(
         "--n_training", type=int, default=50000, help="# of training data"
@@ -273,7 +277,10 @@ def setup(experiment=None):
         help="loss function used to train the fr module [l2 | l1 | l1_smooth]",
     )
     parser.add_argument(
-        "--optim_type", type=str, default="adam", help="optimizer type [adam | adamw | rmsprop]"
+        "--optim_type",
+        type=str,
+        default="adam",
+        help="optimizer type [adam | adamw | rmsprop]",
     )
     parser.add_argument(
         "--n_epochs_fr",
@@ -287,11 +294,11 @@ def setup(experiment=None):
         default=10,
         help="frequency of saving checkpoints at the end of epochs",
     )
-    
+
     # seeding parameters
-    parser.add_argument("--numpy_seed", type=int, default=100) # original=100
-    parser.add_argument("--torch_seed", type=int, default=76) # original=76
-    
+    parser.add_argument("--numpy_seed", type=int, default=100)  # original=100
+    parser.add_argument("--torch_seed", type=int, default=76)  # original=76
+
     # misc notes
     parser.add_argument(
         "--zzz_note",
@@ -305,7 +312,7 @@ def setup(experiment=None):
     if experiment is not None:
         # Model Type
         args.fr_module_type = experiment["fr_module_type"]
-        
+
         # Signal Characteristics
         args.signal_dim = experiment["signal_dim"]
         args.fr_size = experiment["fr_size"]
@@ -317,7 +324,7 @@ def setup(experiment=None):
         args.max_snr_db = experiment["max_snr_db"]
         args.step_snr_db = experiment["step_snr_db"]
         args.gaussian_std = experiment["gaussian_std"]
-        
+
         # cResFreq
         args.fr_n_layers = experiment["fr_n_layers"]
         args.fr_n_filters = experiment["fr_n_filters"]
@@ -325,10 +332,10 @@ def setup(experiment=None):
         args.fr_upsampling = experiment["fr_upsampling"]
         args.fr_kernel_out = experiment["fr_kernel_out"]
         args.fr_out_padding = experiment["fr_out_padding"]
-        
+
         # Channel Attention
         args.fr_reduction_factor = experiment["fr_reduction_factor"]
-        
+
         # Swin
         args.fr_depths = experiment["fr_depths"]
         args.fr_num_heads = experiment["fr_num_heads"]
@@ -337,27 +344,29 @@ def setup(experiment=None):
         args.fr_dropout = experiment["fr_dropout"]
         args.normalization = experiment["normalization"]
         args.fr_optional_relu = experiment["fr_optional_relu"]
-        
+
         # Training
         args.lr_fr = experiment["lr_fr"]
         args.batch_size = experiment["batch_size"]
         args.n_epochs_fr = experiment["n_epochs_fr"]
         args.optim_type = experiment["optim_type"]
-        
+
         # Data
         args.n_training = experiment["n_training"]
         args.n_validation = experiment["n_validation"]
-        
+
         # Note
         args.zzz_note = experiment["zzz_note"]
-        
+
     if args.zzz_note:
         model_name = args.zzz_note.replace(" ", "_")
     else:
         model_name = args.fr_module_type
 
     if args.output_dir is None:
-        args.output_dir = f"./checkpoint/{model_name}_{datetime.now().strftime('%m-%d-%H%M')}"
+        args.output_dir = (
+            f"./checkpoint/{model_name}_{datetime.now().strftime('%m-%d-%H%M')}"
+        )
 
     if torch.cuda.is_available() and not args.no_cuda:
         args.use_cuda = True

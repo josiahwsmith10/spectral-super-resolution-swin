@@ -1,5 +1,3 @@
-import numpy as np
-
 import util
 from .util import is_ml_method
 
@@ -8,7 +6,7 @@ def get_model_parameters(args):
     parameters = {}
     for method, model in args.models.items():
         parameters[method] = util.model_parameters(model)
-    
+
     return parameters
 
 
@@ -22,5 +20,5 @@ def print_parameters(args, parameters):
 
 def experiment0(args):
     parameters = get_model_parameters(args)
-    
+
     print_parameters(args, parameters)

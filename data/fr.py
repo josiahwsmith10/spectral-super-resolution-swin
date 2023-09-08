@@ -109,6 +109,7 @@ def music(signal, xgrid, nfreq, m=20):
     Compute frequency representation obtained with MUSIC.
     """
     music_fr = np.zeros((signal.shape[0], len(xgrid)))
+
     for n in range(signal.shape[0]):
         hankel = make_hankel(signal[n], m)
         _, _, V = np.linalg.svd(hankel)
@@ -120,6 +121,7 @@ def music(signal, xgrid, nfreq, m=20):
         u = V[nfreq[n] :]
         fr = -np.log(np.linalg.norm(np.tensordot(u, v, axes=(1, 1)), axis=0) ** 2)
         music_fr[n] = fr
+
     return music_fr
 
 
@@ -130,9 +132,11 @@ def make_hankel_torch(signal, m):
     """
     n = len(signal)
     h = torch.zeros((m, n - m + 1), dtype=torch.cfloat, device=signal.device)
+
     for r in range(m):
         for c in range(n - m + 1):
             h[r, c] = signal[r + c]
+
     return h
 
 
@@ -143,20 +147,21 @@ def music_torch(signal, xgrid, nfreq, m=20):
     """
     device = signal.device
     music_fr = torch.zeros((signal.shape[0], len(xgrid)), device=device)
-    
+
     # Precompute to save time
     v = torch.exp(
         -2.0j
         * torch.pi
         * torch.outer(xgrid, torch.arange(0, signal.shape[1] - m + 1, device=device))
     )
-    
+
     for n in range(signal.shape[0]):
         hankel = make_hankel_torch(signal[n], m)
         _, _, V = torch.linalg.svd(hankel)
         u = V[nfreq[n] :]
         fr = torch.linalg.norm(u @ v.T.type(torch.cfloat), axis=0) ** -2
-        music_fr[n] = (fr-fr.min())/(fr.max() - fr.min()) # Scale between 0 and 1
+        music_fr[n] = (fr - fr.min()) / (fr.max() - fr.min())  # Scale between 0 and 1
+
     return music_fr
 
 
@@ -170,38 +175,42 @@ def omp_torch(D, X, L):
         D (torch.Tensor): the dictionary (its columns MUST be normalized)
         X (torch.Tensor): the signals to represent
         L (torch.Tensor): the max. number of coefficients for each signal
-        
+
     Outputs:
         A (torch.Tensor): sparse coefficients matrix
     """
-    
     device = D.device
-    
+
     _, P = X.shape
-    _, K = D.shape # D.shape = (n, K)
-    
+    _, K = D.shape  # D.shape = (n, K)
+
     A = torch.zeros(K, P, dtype=torch.cfloat, device=device)
-    
+
     for k in range(P):
-        a = []
-        x = X[:, k]             # k-th signal sample
-        residual = x            # initialize the residual vector
-        indx = torch.zeros(L[k], dtype=int, device=device)   # initialize the index vector
-        
+        # Don't try a reconstruction if the estimated model order is 0
+        if L[k] < 1:
+            continue
+
+        x = X[:, k]  # k-th signal sample
+        residual = x  # initialize the residual vector
+        indx = torch.zeros(
+            L[k], dtype=int, device=device
+        )  # initialize the index vector
+
         for j in range(L[k]):
             # compute the inner product
             proj = D.H @ residual
-            
+
             indx[j] = int(proj.abs().argmax())
-            
+
             # solve the least squares problem
-            a = torch.pinverse(D[:, indx[:(j+1)]]) @ x
-            
+            a = torch.pinverse(D[:, indx[: (j + 1)]]) @ x
+
             # compute the residual in the new dictionary
-            residual = x - D[:, indx[:(j+1)]] @ a
-            
+            residual = x - D[:, indx[: (j + 1)]] @ a
+
         temp = torch.zeros(K, dtype=torch.cfloat, device=device)
-        temp[indx[:(j+1)]] = a
+        temp[indx[: (j + 1)]] = a
         A[:, k] = temp
-        
+
     return A

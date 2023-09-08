@@ -8,18 +8,14 @@ from timm.models.layers import trunc_normal_
 
 from complextorch import CVTensor
 
-from modules.SwinFreq.swin1d import (
-    PatchEmbed1d,
-    PatchUnEmbed1d,
-    RSTB1d
-)
+from modules.SwinFreq.swin1d import PatchEmbed1d, PatchUnEmbed1d, RSTB1d
 
 from modules.cResFreq.cresfreqfast import TConvRB, MFB
 
 
 class SwinBodyBlock(nn.Module):
     """Swin Body Block."""
-    
+
     def __init__(
         self,
         N=256,
@@ -85,7 +81,7 @@ class SwinBodyBlock(nn.Module):
                 img_size=N,
                 patch_size=patch_size,
                 resi_connection=resi_connection,
-                optional_relu=optional_relu
+                optional_relu=optional_relu,
             )
             self.layers.append(layer)
         self.norm = norm_layer(self.num_features)
@@ -125,17 +121,17 @@ class SwinBodyBlock(nn.Module):
         for layer in self.layers:
             x = layer(x)
 
-        x = self.norm(x) # (B, N, C)
+        x = self.norm(x)  # (B, N, C)
         x = self.patch_unembed(x)
 
         return x
-    
+
     def forward(self, x):
-            x = x.abs()
-        
-            x = self.conv_after_body(self.forward_features(x)) + x
-            
-            return x        
+        x = x.abs()
+
+        x = self.conv_after_body(self.forward_features(x)) + x
+
+        return x
 
 
 class SwinFreq(nn.Module):
@@ -170,16 +166,16 @@ class SwinFreq(nn.Module):
         self.out_padding = out_padding
         self.normalization = normalization
         self.dropout = dropout
-        
+
         self.fr_size = inner_dim * upsampling
-        
+
         self.mf = MFB(
             signal_dim=signal_dim,
             n_filters=n_filters,
             inner_dim=inner_dim,
-            kernel_size=kernel_size
+            kernel_size=kernel_size,
         )
-        
+
         self.res_layers = SwinBodyBlock(
             N=inner_dim,
             embed_dim=n_filters,
@@ -192,7 +188,7 @@ class SwinFreq(nn.Module):
             resi_connection="1conv",
             optional_relu=optional_relu,
         )
-        
+
         self.recon = TConvRB(
             in_channels=n_filters,
             out_channels=1,
@@ -200,39 +196,39 @@ class SwinFreq(nn.Module):
             upsampling=upsampling,
             out_padding=out_padding,
         )
-        
+
     def min_max_freq(self, x: CVTensor):
         # Computes min-max norm values in frequency domain
         # x is (batch_size x N)
-        
+
         y = x.fft(dim=1)
-        
+
         y_min = y.abs().min(dim=1, keepdim=True)[0]
         y_max = y.abs().max(dim=1, keepdim=True)[0]
-        
+
         return 1 / (y_max - y_min), -y_min / (y_max - y_min)
-    
+
     def norm(self, x, kind="min-max"):
         c = x[:, 0][:, None]
-        
+
         x = x / c
-        
+
         if kind == "min-max":
             a, b = self.min_max_freq(x)
         elif kind == "abs":
             a = 1 / x.abs().max(dim=1, keepdim=True)[0]
             b = 0
-        
+
         return a * x + b
 
     def forward(self, x):
-        x = CVTensor(x[:, 0], x[:, 1]) # batch_size x N
-        
+        x = CVTensor(x[:, 0], x[:, 1])  # batch_size x N
+
         if self.normalization:
             x = self.norm(x)
-        
+
         x = self.mf(x)
 
         x = self.res_layers(x)
-        
+
         return self.recon(x)

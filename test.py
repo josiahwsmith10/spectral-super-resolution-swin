@@ -10,23 +10,23 @@ import util
 def main():
     args = setup(
         checkpoint_path="checkpoint/skipfreq_snr_big8/fr/epoch_60.pth"
-        #checkpoint_path="checkpoint/swin_666_888_mmpnorm_07-20-0319/swinfreq/last.pth"
-        #checkpoint_path="checkpoint/swin_666_888_500k_07-27-0406/swinfreq/last.pth"
-        #checkpoint_path="checkpoint/cvswin_666_888_300k_07-25-0902/cvswinfreq/last.pth"
-        #checkpoint_path="checkpoint/swin_666_888_150k_07-22-2215/swinfreq/last.pth"
-        #checkpoint_path="checkpoint/swin_666_888_150k_relu_07-23-0535/swinfreq/last.pth"
-        #checkpoint_path="checkpoint/cvswin_222_888_200k_07-24-2147/cvswinfreq/last.pth"
-        #checkpoint_path="PATH"
-        #checkpoint_path="PATH"
-        #checkpoint_path="PATH"
-        #checkpoint_path="PATH"
-        #checkpoint_path="PATH"
-        #checkpoint_path="PATH"
-        #checkpoint_path="PATH"
-        #checkpoint_path="PATH"
-        #checkpoint_path="PATH"
+        # checkpoint_path="checkpoint/swin_666_888_mmpnorm_07-20-0319/swinfreq/last.pth"
+        # checkpoint_path="checkpoint/swin_666_888_500k_07-27-0406/swinfreq/last.pth"
+        # checkpoint_path="checkpoint/cvswin_666_888_300k_07-25-0902/cvswinfreq/last.pth"
+        # checkpoint_path="checkpoint/swin_666_888_150k_07-22-2215/swinfreq/last.pth"
+        # checkpoint_path="checkpoint/swin_666_888_150k_relu_07-23-0535/swinfreq/last.pth"
+        # checkpoint_path="checkpoint/cvswin_222_888_200k_07-24-2147/cvswinfreq/last.pth"
+        # checkpoint_path="PATH"
+        # checkpoint_path="PATH"
+        # checkpoint_path="PATH"
+        # checkpoint_path="PATH"
+        # checkpoint_path="PATH"
+        # checkpoint_path="PATH"
+        # checkpoint_path="PATH"
+        # checkpoint_path="PATH"
+        # checkpoint_path="PATH"
     )
-    
+
     # Temporarily store
     n_testing = args.n_testing
     min_snr_db = args.min_snr_db
@@ -37,13 +37,13 @@ def main():
 
     np.random.seed(args.numpy_seed)
     torch.manual_seed(args.torch_seed)
-    
+
     # Load the model from the checkpoint
     fr_module, _, _, args, _ = util.load(
         checkpoint_path=args.checkpoint_path,
-        #device=torch.device("cpu")
+        # device=torch.device("cpu")
     )
-    
+
     # Set parameters
     args.n_testing = n_testing
     args.min_snr_db = min_snr_db
@@ -51,7 +51,7 @@ def main():
     args.step_snr_db = step_snr_db
     args.batch_size = batch_size
     args.n_testing = n_testing
-    
+
     # Print args into console
     message = ""
     for k, v in sorted(vars(args).items()):
@@ -68,14 +68,14 @@ def main():
         fr_criterion = torch.nn.L1Loss(reduction="sum")
     elif args.loss_fn == "l1_smooth":
         fr_criterion = torch.nn.SmoothL1Loss(reduction="sum")
-        
+
     loss_test_fr = util.test_freq_SR(
         args=args,
         fr_module=fr_module,
         fr_criterion=fr_criterion,
-        test_loader=test_loader
+        test_loader=test_loader,
     )
-    
+
     print("Testing loss: ", loss_test_fr)
 
 
@@ -84,7 +84,7 @@ def setup(checkpoint_path=None):
     Initializes argument parsing. Returns the parsed arguments.
     """
     parser = argparse.ArgumentParser()
-    
+
     # checkpoint
     parser.add_argument(
         "--checkpoint_path",
@@ -97,7 +97,7 @@ def setup(checkpoint_path=None):
     parser.add_argument(
         "--no_cuda", action="store_true", help="avoid using CUDA when available"
     )
-    
+
     # dataset parameters
     parser.add_argument(
         "--batch_size", type=int, default=256, help="batch size used during testing"
@@ -140,8 +140,10 @@ def setup(checkpoint_path=None):
     )
     parser.add_argument("--min_snr_db", type=int, default=-10, help="minimum SNR in dB")
     parser.add_argument("--max_snr_db", type=int, default=40, help="maximum SNR in dB")
-    parser.add_argument("--step_snr_db", type=int, default=10, help="step size of SNR in dB")
-    
+    parser.add_argument(
+        "--step_snr_db", type=int, default=10, help="step size of SNR in dB"
+    )
+
     # kernel parameters used to generate the ideal frequency representation
     parser.add_argument(
         "--kernel_type",
@@ -161,7 +163,7 @@ def setup(checkpoint_path=None):
         default=0.12,
         help="std of the gaussian kernel normalized by signal_dim",
     )
-    
+
     # testing parameters
     parser.add_argument(
         "--n_testing", type=int, default=5000, help="# of training data"
@@ -169,11 +171,11 @@ def setup(checkpoint_path=None):
     parser.add_argument(
         "--n_validation", type=int, default=1000, help="# of validation data"
     )
-    
+
     # seed RNGs
-    parser.add_argument("--numpy_seed", type=int, default=100) # original=100
-    parser.add_argument("--torch_seed", type=int, default=76) # original=76
-    
+    parser.add_argument("--numpy_seed", type=int, default=100)  # original=100
+    parser.add_argument("--torch_seed", type=int, default=76)  # original=76
+
     args = parser.parse_args()
 
     # Determine if cuda can be used

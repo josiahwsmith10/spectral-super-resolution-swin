@@ -31,7 +31,7 @@ def save(model, optimizer, scheduler, args, epoch, module_type):
 def load(checkpoint_path, device=torch.device("cuda")):
     checkpoint = torch.load(checkpoint_path, map_location=device)
     args = checkpoint["args"]
-    
+
     # Change args to use defaults for cResFreq from paper
     if "skipfreq" in args.output_dir:
         args.fr_module_type = "cresfreq"
@@ -41,13 +41,13 @@ def load(checkpoint_path, device=torch.device("cuda")):
         args.loss_fn = "l2"
     elif "mmpnorm" in args.output_dir:
         args.normalization = "min-max"
-        
+
     if "fr_dropout" not in vars(args):
         args.fr_dropout = 0.0
-        
+
     if "fr_optional_relu" not in vars(args):
         args.fr_optional_relu = False
-        
+
     if device == torch.device("cpu"):
         args.use_cuda = False
     model = modules.select_model(args)

@@ -33,17 +33,17 @@ class SSIM1d(nn.Module):
     ) -> torch.Tensor:
         assert isinstance(self.w, torch.Tensor)
         assert x.dim() == 1 and y.dim() == 1, "x and y must be vectors"
-        
+
         x = x[None, None, :]
         y = y[None, None, :]
-        
+
         if data_range is None:
             data_range = y.max()
-        
+
         C1 = (self.k1 * data_range) ** 2
         C2 = (self.k2 * data_range) ** 2
         ux = F.conv1d(x, self.w)
-        uy = F.conv1d(y, self.w) 
+        uy = F.conv1d(y, self.w)
         uxx = F.conv1d(x * x, self.w)
         uyy = F.conv1d(y * y, self.w)
         uxy = F.conv1d(x * y, self.w)
@@ -68,23 +68,23 @@ class SSIM1d(nn.Module):
 class RMSE1d(nn.Module):
     def __init__(self):
         super().__init__()
-    
+
     def forward(self, x, y):
         assert x.dim() == 1 and y.dim() == 1, "x and y must be vectors"
-        
+
         return (x - y).pow(2).mean().sqrt()
 
 
 class PSNR1d(nn.Module):
     def __init__(self):
         super().__init__()
-        
+
     def forward(self, x, y, data_range=None):
         assert x.dim() == 1 and y.dim() == 1, "x and y must be vectors"
-        
+
         if data_range is None:
             data_range = y.max()
-            
+
         mse = (x - y).pow(2).mean()
-        
+
         return 10 * torch.log10(data_range / mse)
