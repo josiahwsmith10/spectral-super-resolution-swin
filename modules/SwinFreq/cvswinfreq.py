@@ -10,7 +10,7 @@ import complextorch.nn as cvnn
 from complextorch import CVTensor
 
 from modules.SwinFreq.swin1d import PatchEmbed1d, PatchUnEmbed1d
-from modules.SwinFreq.cvswin1d import CVRSTB1d
+from modules.SwinFreq.cvswin1d import CVSSTB
 from modules.cResFreq.cresfreqfast import TConvRB, MFB
 
 
@@ -66,7 +66,7 @@ class CVSwinBodyBlock(nn.Module):
         # build Residual Swin Transformer blocks (RSTB)
         self.layers = nn.ModuleList()
         for i_layer in range(self.num_layers):
-            layer = CVRSTB1d(
+            layer = CVSSTB(
                 dim=embed_dim,
                 input_resolution=patches_resolution,
                 depth=depths[i_layer],

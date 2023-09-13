@@ -163,8 +163,8 @@ class CVWindowAttention1d(nn.Module):
         return flops
 
 
-class CVSwinTransformerBlock1d(nn.Module):
-    r"""Swin Transformer Block. Modified for 1-D tensor data.
+class CVSSTL(nn.Module):
+    r"""Complex-Valued Signal Swin Transformer Layer (CVSSTL).
 
     Args:
         dim (int): Number of input channels.
@@ -368,7 +368,7 @@ class CVBasicLayer1d(nn.Module):
         # build blocks
         self.blocks = nn.ModuleList(
             [
-                CVSwinTransformerBlock1d(
+                CVSSTL(
                     dim=dim,
                     input_resolution=input_resolution,
                     num_heads=num_heads,
@@ -400,9 +400,9 @@ class CVBasicLayer1d(nn.Module):
         return flops
 
 
-class CVRSTB1d(nn.Module):
-    """Residual Swin Transformer Block (RSTB). Modified for 1-D tensor data.
-
+class CVSSTB(nn.Module):
+    """Complex-Valued Signal Swin Transformer Block (CVSSTB). 
+    
     Args:
         dim (int): Number of input channels.
         input_resolution (int): Input resolution.
@@ -437,7 +437,7 @@ class CVRSTB1d(nn.Module):
         patch_size=4,
         resi_connection="1conv",
     ):
-        super(CVRSTB1d, self).__init__()
+        super(CVSSTB, self).__init__()
 
         self.dim = dim
         self.input_resolution = input_resolution

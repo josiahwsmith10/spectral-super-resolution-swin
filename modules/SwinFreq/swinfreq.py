@@ -8,7 +8,7 @@ from timm.models.layers import trunc_normal_
 
 from complextorch import CVTensor
 
-from modules.SwinFreq.swin1d import PatchEmbed1d, PatchUnEmbed1d, RSTB1d
+from modules.SwinFreq.swin1d import PatchEmbed1d, PatchUnEmbed1d, SSTB
 
 from modules.cResFreq.cresfreqfast import TConvRB, MFB
 
@@ -66,7 +66,7 @@ class SwinBodyBlock(nn.Module):
         # build Residual Swin Transformer blocks (RSTB)
         self.layers = nn.ModuleList()
         for i_layer in range(self.num_layers):
-            layer = RSTB1d(
+            layer = SSTB(
                 dim=embed_dim,
                 input_resolution=patches_resolution,
                 depth=depths[i_layer],

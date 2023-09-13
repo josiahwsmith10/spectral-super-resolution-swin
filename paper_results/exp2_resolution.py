@@ -43,11 +43,17 @@ def freq_to_idx(f_i, args):
     xgrid = np.linspace(-0.5, 0.5, args.fr_size, endpoint=False)
 
     idx = []
+    idx_exact = []
 
     for f_n in f_i:
-        idx.append(int(np.argmin(np.abs(f_n - xgrid))))
+        i = int(np.argmin(np.abs(f_n - xgrid)))
+        i_min = max([0, i - args.res_tol])
+        i_max = min([i + args.res_tol, args.fr_size])
+        
+        idx.append((i_min, i_max))
+        idx_exact.append(i)
 
-    return idx
+    return idx, idx_exact
 
 
 def compute_resolution(model, data_tuple, args):
@@ -57,11 +63,16 @@ def compute_resolution(model, data_tuple, args):
 
     results = []
     for y_pred_i, f_i in zip(y_pred, f):
-        idx_i = freq_to_idx(f_i, args)
+        idx_i, idx_exact_i = freq_to_idx(f_i, args)
 
-        amp_i = y_pred_i[idx_i]
+        amp_i = torch.tensor(
+            [
+                y_pred_i[idx_i[0][0] : idx_i[0][1]].max(),
+                y_pred_i[idx_i[1][0] : idx_i[1][1]].max(),
+            ]
+        )
 
-        amp_mid = y_pred_i[(idx_i[0] + idx_i[1]) // 2]
+        amp_mid = y_pred_i[(idx_exact_i[0] + idx_exact_i[1]) // 2]
 
         results.append(amp_mid < (amp_i.min() / np.sqrt(2)))
 
@@ -79,6 +90,8 @@ def get_results(args, data):
 
         print(f"Computing probability of resolution for method={method}")
         for sep in tqdm(args.res_list):
+            if method.lower() == "music" or method.lower() == "omp":
+                model.force_nfreqs = 2
             results[method][sep] = compute_resolution(model, data[sep], args)
     return results
 

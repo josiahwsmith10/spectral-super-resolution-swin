@@ -38,6 +38,8 @@ class MUSIC(nn.Module):
         elif source_number_method.lower() == "aic":
             self.nfreq_estimator = aic_arr_torch
 
+        self.force_nfreqs = None
+
     def cuda(self):
         super().cuda()
 
@@ -48,7 +50,10 @@ class MUSIC(nn.Module):
     def forward(self, x: torch.Tensor):
         x = x[:, 0] + 1j * x[:, 1]
 
-        nfreqs = self.nfreq_estimator(x, param=self.param)
+        if not self.force_nfreqs:
+            nfreqs = self.nfreq_estimator(x, param=self.param)
+        else:
+            nfreqs = self.force_nfreqs * torch.ones(x.shape[0], dtype=torch.int)
 
         return music_torch(x, self.xgrid, nfreqs, m=self.m)
 
@@ -75,6 +80,8 @@ class OMP(nn.Module):
         t = torch.arange(signal_dim).unsqueeze(1)
         self.D = torch.exp(1j * 2 * torch.pi * dict_freq * t)  # (signal_dim, fr_size)
 
+        self.force_nfreqs = None
+
     def cuda(self):
         super().cuda()
 
@@ -85,7 +92,10 @@ class OMP(nn.Module):
     def forward(self, x):
         x = x[:, 0] + 1j * x[:, 1]
 
-        nfreqs = self.nfreq_estimator(x, param=self.param)
+        if not self.force_nfreqs:
+            nfreqs = self.nfreq_estimator(x, param=self.param)
+        else:
+            nfreqs = self.force_nfreqs * torch.ones(x.shape[0], dtype=torch.int)
 
         y = omp_torch(self.D, x.T, nfreqs).T
 

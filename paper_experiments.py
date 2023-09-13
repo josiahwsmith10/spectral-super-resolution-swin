@@ -27,13 +27,13 @@ def main():
     args = setup()
 
     create_methods(args)
-    
+
     experiment0(args)
-    #experiment1(args)
-    #experiment2(args)
-    #experiment3(args)
-    #experiment4(args)
-    experiment5(args)
+    # experiment1(args)
+    # experiment2(args)
+    experiment3(args)
+    # experiment4(args)
+    # experiment5(args)
 
 
 def setup():
@@ -111,6 +111,12 @@ def setup():
         help="signal-to-noise ratio for resolution experiment",
     )
     parser.add_argument(
+        "--res_tol",
+        type=int,
+        default=5,
+        help="number of bins on either side to allow to find maximum of peak",
+    )
+    parser.add_argument(
         "--exp2_num_samples",
         type=int,
         default=1000,
@@ -122,20 +128,27 @@ def setup():
         "--sidelobes_snr",
         nargs="+",
         type=int,
-        default=[0, 10, 20],
+        default=[0, 20],
         help="SNR levels for sidelobe comparison",
     )
     parser.add_argument(
         "--sidelobes_max_n_freq",
         type=int,
-        default=4,
+        default=2,
         help="for each signal the number of frequencies is uniformly drawn between 1 and max_n_freq",
     )
     parser.add_argument(
         "--exp3_num_samples",
         type=int,
-        default=10,
+        default=2,
         help="number of samples used in experiment 3 per SNR value",
+    )
+    parser.add_argument(
+        "--sidelobe_sep_list",
+        nargs="+",
+        type=int,
+        default=[0.6, 1.5],
+        help="resolution spacing for sidelobes (x/N)",
     )
 
     # experiment 4
@@ -224,8 +237,8 @@ def setup():
     )
 
     # seeding parameters
-    parser.add_argument("--numpy_seed", type=int, default=100)  # original=100
-    parser.add_argument("--torch_seed", type=int, default=76)  # original=76
+    parser.add_argument("--numpy_seed", type=int, default=76)
+    parser.add_argument("--torch_seed", type=int, default=76)
 
     args = parser.parse_args()
 

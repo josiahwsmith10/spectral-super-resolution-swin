@@ -182,8 +182,8 @@ class WindowAttention1d(nn.Module):
         return flops
 
 
-class SwinTransformerBlock1d(nn.Module):
-    r"""Swin Transformer Block. Modified for 1-D tensor data.
+class SSTL(nn.Module):
+    r"""Signal Swin Transformer Layer (SSTB).
 
     Args:
         dim (int): Number of input channels.
@@ -400,7 +400,7 @@ class BasicLayer1d(nn.Module):
         # build blocks
         self.blocks = nn.ModuleList(
             [
-                SwinTransformerBlock1d(
+                SSTL(
                     dim=dim,
                     input_resolution=input_resolution,
                     num_heads=num_heads,
@@ -451,8 +451,8 @@ class BasicLayer1d(nn.Module):
         return flops
 
 
-class RSTB1d(nn.Module):
-    """Residual Swin Transformer Block (RSTB). Modified for 1-D tensor data.
+class SSTB(nn.Module):
+    """Signal Swin Transformer Block (SSTB).
 
     Args:
         dim (int): Number of input channels.
@@ -495,7 +495,7 @@ class RSTB1d(nn.Module):
         patch_size=4,
         resi_connection="1conv",
     ):
-        super(RSTB1d, self).__init__()
+        super(SSTB, self).__init__()
 
         self.dim = dim
         self.input_resolution = input_resolution
