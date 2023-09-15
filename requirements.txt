@@ -5,3 +5,4 @@ scipy
 pandas
 tabulate
 tqdm
+tensorboard

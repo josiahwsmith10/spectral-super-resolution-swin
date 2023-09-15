@@ -1,5 +1,5 @@
 """
-Experiment 5: Boeing 727 real data
+Experiment 5: real plane data
 """
 
 import torch

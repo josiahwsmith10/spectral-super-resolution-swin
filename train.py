@@ -16,11 +16,11 @@ import util
 logger = logging.getLogger(__name__)
 
 
-def main(experiment=None, checkpoint_path=None):
+def main():
     """
     Modified from: https://github.com/sreyas-mohan/DeepFreq
     """
-    args, tb_writer = setup(experiment)
+    args, tb_writer = setup()
 
     np.random.seed(args.numpy_seed)
     torch.manual_seed(args.torch_seed)
@@ -30,13 +30,13 @@ def main(experiment=None, checkpoint_path=None):
     val_loader = dataset.make_eval_data_v2(args)
 
     # Initialize the network
-    if checkpoint_path is None:
+    if args.checkpoint_path is None:
         fr_module = modules.select_model(args)
         fr_optimizer, fr_scheduler = util.set_optim(args, fr_module)
         start_epoch = 1
     else:
         fr_module, fr_optimizer, fr_scheduler, args, _ = util.load(
-            checkpoint_path=checkpoint_path
+            checkpoint_path=args.checkpoint_path
         )
 
     logger.info(
@@ -71,11 +71,27 @@ def main(experiment=None, checkpoint_path=None):
             )
 
 
-def setup(experiment=None):
+def setup():
     """
     Initializes logging, tensorboard, and argument parsing. Returns the parsed arguments and the tensorboard writer.
     """
     parser = argparse.ArgumentParser()
+
+    # model type (NOTE: overrides other parameters for defining model type)
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="",
+        help="model type (NOTE: overrides other parameters for defining model type)",
+    )
+
+    # checkpoint
+    parser.add_argument(
+        "--checkpoint_path",
+        type=str,
+        default="checkpoint/skipfreq_snr_big8/fr/epoch_60.pth",
+        help="path to checkpoint to load",
+    )
 
     # basic parameters
     parser.add_argument(
@@ -299,74 +315,87 @@ def setup(experiment=None):
     parser.add_argument("--numpy_seed", type=int, default=100)  # original=100
     parser.add_argument("--torch_seed", type=int, default=76)  # original=76
 
-    # misc notes
-    parser.add_argument(
-        "--zzz_note",
-        type=str,
-        default="",
-        help="Note about model/experiment",
-    )
-
     args = parser.parse_args()
 
-    if experiment is not None:
-        # Model Type
-        args.fr_module_type = experiment["fr_module_type"]
-
+    if args.model.lower() == "swinfreq":
+        args.fr_module_type = "swinfreq"
         # Signal Characteristics
-        args.signal_dim = experiment["signal_dim"]
-        args.fr_size = experiment["fr_size"]
-        args.min_sep = experiment["min_sep"]
-        args.amplitude = experiment["amplitude"]
-        args.noise = experiment["noise"]
-        args.snr = experiment["snr"]
-        args.min_snr_db = experiment["min_snr_db"]
-        args.max_snr_db = experiment["max_snr_db"]
-        args.step_snr_db = experiment["step_snr_db"]
-        args.gaussian_std = experiment["gaussian_std"]
-
+        args.signal_dim = 64
+        args.fr_size = 4096
+        args.min_sep = 0.5
+        args.amplitude = "uniform"
+        args.noise = "gaussian_blind_strict"
+        args.snr = -10
+        args.min_snr_db = -10
+        args.max_snr_db = 40
+        args.step_snr_db = 10
+        args.gaussian_std = 0.12
         # cResFreq
-        args.fr_n_layers = experiment["fr_n_layers"]
-        args.fr_n_filters = experiment["fr_n_filters"]
-        args.fr_inner_dim = experiment["fr_inner_dim"]
-        args.fr_upsampling = experiment["fr_upsampling"]
-        args.fr_kernel_out = experiment["fr_kernel_out"]
-        args.fr_out_padding = experiment["fr_out_padding"]
-
+        args.fr_n_layers = 24
+        args.fr_n_filters = 32
+        args.fr_inner_dim = 256
+        args.fr_upsampling = 16
+        args.fr_kernel_out = 18
+        args.fr_out_padding = 0
         # Channel Attention
-        args.fr_reduction_factor = experiment["fr_reduction_factor"]
-
+        args.fr_reduction_factor = 1
         # Swin
-        args.fr_depths = experiment["fr_depths"]
-        args.fr_num_heads = experiment["fr_num_heads"]
-        args.fr_window_size = experiment["fr_window_size"]
-        args.fr_mlp_ratio = experiment["fr_mlp_ratio"]
-        args.fr_dropout = experiment["fr_dropout"]
-        args.normalization = experiment["normalization"]
-        args.fr_optional_relu = experiment["fr_optional_relu"]
-
+        args.fr_depths = [4, 4, 4]
+        args.fr_num_heads = [8, 8, 8]
+        args.fr_window_size = 16
+        args.fr_mlp_ratio = 2.0
+        args.fr_dropout = 0.0
+        args.normalization = "min-max"
+        args.fr_optional_relu = 0
         # Training
-        args.lr_fr = experiment["lr_fr"]
-        args.batch_size = experiment["batch_size"]
-        args.n_epochs_fr = experiment["n_epochs_fr"]
-        args.optim_type = experiment["optim_type"]
-
+        args.lr_fr = 3e-3
+        args.batch_size = 256
+        args.n_epochs_fr = 200
+        args.optim_type = "adamw"
         # Data
-        args.n_training = experiment["n_training"]
-        args.n_validation = experiment["n_validation"]
-
-        # Note
-        args.zzz_note = experiment["zzz_note"]
-
-    if args.zzz_note:
-        model_name = args.zzz_note.replace(" ", "_")
-    else:
-        model_name = args.fr_module_type
+        args.n_training = 500000
+        args.n_validation = 5000
+    elif args.model.lower() == "cvswinfreq":
+        args.fr_module_type = "cvswinfreq"
+        # Signal Characteristics
+        args.signal_dim = 64
+        args.fr_size = 4096
+        args.min_sep = 0.5
+        args.amplitude = "uniform"
+        args.noise = "gaussian_blind_strict"
+        args.snr = -10
+        args.min_snr_db = -10
+        args.max_snr_db = 40
+        args.step_snr_db = 10
+        args.gaussian_std = 0.12
+        # cResFreq
+        args.fr_n_layers = 24
+        args.fr_n_filters = 32
+        args.fr_inner_dim = 256
+        args.fr_upsampling = 16
+        args.fr_kernel_out = 18
+        args.fr_out_padding = 0
+        # Channel Attention
+        args.fr_reduction_factor = 1
+        # Swin
+        args.fr_depths = [2, 2, 2]
+        args.fr_num_heads = [8, 8, 8]
+        args.fr_window_size = 16
+        args.fr_mlp_ratio = 2.0
+        args.fr_dropout = 0.0
+        args.normalization = "min-max"
+        args.fr_optional_relu = 0
+        # Training
+        args.lr_fr = 3e-3
+        args.batch_size = 256
+        args.n_epochs_fr = 200
+        args.optim_type = "adamw"
+        # Data
+        args.n_training = 500000
+        args.n_validation = 5000
 
     if args.output_dir is None:
-        args.output_dir = (
-            f"./checkpoint/{model_name}_{datetime.now().strftime('%m-%d-%H%M')}"
-        )
+        args.output_dir = f"./checkpoint/{args.fr_module_type}_{datetime.now().strftime('%m-%d-%H%M')}"
 
     if torch.cuda.is_available() and not args.no_cuda:
         args.use_cuda = True

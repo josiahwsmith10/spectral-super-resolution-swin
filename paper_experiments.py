@@ -1,11 +1,11 @@
 """
-Experiments for SwinFreq paper. 
+Experiments for CV/SwinFreq paper. 
 - Experiment 0: number of parameters
 - Experiment 1: PSNR / SSIM across SNR
 - Experiment 2: resolution capability
 - Experiment 3: comparison of sidelobes
 - Experiment 4: spinning point scatterers
-- Experiment 5: real Boeing data
+- Experiment 5: real plane data
 """
 
 import numpy as np
@@ -29,10 +29,10 @@ def main():
     create_methods(args)
 
     experiment0(args)
-    # experiment1(args)
-    # experiment2(args)
-    # experiment3(args)
-    # experiment4(args)
+    experiment1(args)
+    experiment2(args)
+    experiment3(args)
+    experiment4(args)
     experiment5(args)
 
 
@@ -50,7 +50,6 @@ def setup():
             "OMP",
             "saved/models/cresfreq.pth",
             "saved/models/cvswinfreq222.pth",
-            # "saved/models/cvswinfreq444.pth",
             "saved/models/swinfreq444.pth",
         ],
         help="methods to use (use path to checkpoint for ML models)",

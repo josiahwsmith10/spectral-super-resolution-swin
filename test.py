@@ -8,24 +8,7 @@ import util
 
 
 def main():
-    args = setup(
-        checkpoint_path="checkpoint/skipfreq_snr_big8/fr/epoch_60.pth"
-        # checkpoint_path="checkpoint/swin_666_888_mmpnorm_07-20-0319/swinfreq/last.pth"
-        # checkpoint_path="checkpoint/swin_666_888_500k_07-27-0406/swinfreq/last.pth"
-        # checkpoint_path="checkpoint/cvswin_666_888_300k_07-25-0902/cvswinfreq/last.pth"
-        # checkpoint_path="checkpoint/swin_666_888_150k_07-22-2215/swinfreq/last.pth"
-        # checkpoint_path="checkpoint/swin_666_888_150k_relu_07-23-0535/swinfreq/last.pth"
-        # checkpoint_path="checkpoint/cvswin_222_888_200k_07-24-2147/cvswinfreq/last.pth"
-        # checkpoint_path="PATH"
-        # checkpoint_path="PATH"
-        # checkpoint_path="PATH"
-        # checkpoint_path="PATH"
-        # checkpoint_path="PATH"
-        # checkpoint_path="PATH"
-        # checkpoint_path="PATH"
-        # checkpoint_path="PATH"
-        # checkpoint_path="PATH"
-    )
+    args = setup()
 
     # Temporarily store
     n_testing = args.n_testing
@@ -41,7 +24,7 @@ def main():
     # Load the model from the checkpoint
     fr_module, _, _, args, _ = util.load(
         checkpoint_path=args.checkpoint_path,
-        # device=torch.device("cpu")
+        # device=torch.device("cpu") # Use if using CPU-based torch (or on Mac with Apple Silicon)
     )
 
     # Set parameters
@@ -79,7 +62,7 @@ def main():
     print("Testing loss: ", loss_test_fr)
 
 
-def setup(checkpoint_path=None):
+def setup():
     """
     Initializes argument parsing. Returns the parsed arguments.
     """
@@ -89,7 +72,7 @@ def setup(checkpoint_path=None):
     parser.add_argument(
         "--checkpoint_path",
         type=str,
-        default=checkpoint_path,
+        default="checkpoint/skipfreq_snr_big8/fr/epoch_60.pth",
         help="path to checkpoint to load",
     )
 
