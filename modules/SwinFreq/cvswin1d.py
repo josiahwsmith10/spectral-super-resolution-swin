@@ -98,7 +98,7 @@ class CVWindowAttention1d(nn.Module):
         self.proj = cvnn.CVLinear(dim, dim)
 
         self.proj_drop = cvnn.CVDropout(proj_drop)
-        self.softmax = cvnn.PhaseSoftmax(dim=-1)
+        self.softmax = cvnn.PhaseSoftMax(dim=-1)
 
     def forward(self, x, mask=None):
         """

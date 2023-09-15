@@ -1,75 +1,94 @@
 function [f5,h5] = exp5_figures()
-load("exp5.mat","Periodogram","MUSIC","OMP","cresfreq",...bit
+data = load("exp5.mat","Periodogram","MUSIC","OMP","cresfreq",...bit
     "cvswinfreq","swinfreq");
 
-numFigs = 6;
+methods = ["Periodogram","MUSIC","OMP","cresfreq","swinfreq","cvswinfreq"];
 
-% Signal parameters
-dr = 3e8/2/300e6;
-r = 128*dr;
-r_label = 0:r/4096:r-r/4096;
+f5 = gobjects(1,length(methods)*2);
+h5 = gobjects(1,length(methods)*2);
 
-f5 = gobjects(1,numFigs*2);
-h5 = gobjects(1,numFigs*2);
+for ind = 1:length(methods)
+    f5(ind) = figure(500+ind);
+    clf(f5(ind))
+    if methods(ind) == "Periodogram" || methods(ind) == "swinfreq"
+        h5(ind) = create_figure_exp5_type1(data.(methods(ind)),true);
+    else
+        h5(ind) = create_figure_exp5_type1(data.(methods(ind)),false);
+    end
+    saveFigPng(h5(ind),"exp5_"+methods(ind))
 
-f5(1) = figure(501);
-clf(f5(1))
-h5(1) = create_figure_exp5(r_label,Periodogram,true);
-saveFigPng(h5(1),"exp5_periodogram")
-
-f5(2) = figure(502);
-clf(f5(2))
-h5(2) = create_figure_exp5(r_label,MUSIC,false);
-saveFigPng(h5(2),"exp5_music")
-
-f5(3) = figure(503);
-clf(f5(3))
-h5(3) = create_figure_exp5(r_label,OMP,false);
-saveFigPng(h5(3),"exp5_omp")
-
-f5(4) = figure(504);
-clf(f5(4))
-h5(4) = create_figure_exp5(r_label,cresfreq,false);
-saveFigPng(h5(4),"exp5_cresfreq")
-
-f5(5) = figure(505);
-clf(f5(5))
-h5(5) = create_figure_exp5(r_label,swinfreq,false);
-saveFigPng(h5(5),"exp5_swinfreq")
-
-f5(6) = figure(506);
-clf(f5(6))
-h5(6) = create_figure_exp5(r_label,cvswinfreq,false);
-saveFigPng(h5(6),"exp5_cvswinfreq")
+    f5(ind+6) = figure(500+ind+6);
+    clf(f5(ind+6))
+    if methods(ind) == "Periodogram"
+        h5(ind+6) = create_figure_exp5_type2(data.(methods(ind)),true);
+    else
+        h5(ind+6) = create_figure_exp5_type2(data.(methods(ind)),false);
+    end
+    saveFigPng(h5(ind+6),"exp5_"+methods(ind)+"_hrrp")
 end
 
-function h = create_figure_exp5(r_label,A,isY)
-A = flip(flip(A(1:2:end,:),1),2);
+end
 
-A = 20*log10(abs(A/max(A(:))));
-A(A<-40) = -40;
+function h = create_figure_exp5_type1(A,isY)
+A = fftshift(A,2).';
 
-x = r_label/2;
-numPulses = size(A,1);
-y = 1:numPulses;
+A = A(750:3250,130:167);
+
+y = linspace(-0.225,0.225,size(A,1));
+x = linspace(-0.225,0.225,size(A,2));
+
+A = A/max(A(:));
+A(A<0) = 0;
+A = 20*log10(A);
+
+A(A<-35) = -35;
 
 h = handle(axes());
-mesh(x,y,A,"FaceColor","interp","EdgeColor","none")
+mesh(h,x,y,A,"FaceColor","interp","EdgeColor","none")
 
-xlabel("Relative Range / m");
+xlabel(h,"Cross Range / m");
 view(h,2)
 
-% xlim([2.5,12.5])
-ylim([y(1),y(end)])
+xlim(h,[x(1),x(end)])
+ylim(h,[y(1),y(end)])
 
 if isY
-    ylabel("Pulse Index");
-    yticks(64-flip(100:100:500))
-    yticklabels(flip(100:100:500))
+    ylabel(h,"Range / m");
 end
 
 if ~isY
-    yticklabels([""])
+    yticklabels(h,[""])
+end
+
+h.FontSize = 16;
+end
+
+function h = create_figure_exp5_type2(A,isY)
+A = fftshift(A,2).';
+
+A = A(750:3250,130:167);
+
+y = linspace(-0.225,0.225,size(A,1));
+
+A = A/max(A(:));
+A(A<0) = 0;
+a = A(:,end/2);
+a = a/max(a(:));
+
+h = handle(axes());
+plot(h,y,a)
+
+xlabel(h,"Range / m");
+
+xlim(h,[0,1])
+xlim(h,[y(1),y(end)])
+
+if isY
+    ylabel(h,"Normalized Amplitude");
+end
+
+if ~isY
+    yticklabels(h,[""])
 end
 
 h.FontSize = 16;

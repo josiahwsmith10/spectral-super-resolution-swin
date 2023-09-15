@@ -20,7 +20,7 @@ saveFigPng(h4(1),"exp4_periodogram_big")
 f4(7) = figure(407);
 clf(f4(7))
 h4(7) = create_figure_exp4(r_label,Periodogram,true,"small");
-saveFigPng(h4(1),"exp4_periodogram_small")
+saveFigPng(h4(7),"exp4_periodogram_small")
 
 f4(2) = figure(402);
 clf(f4(2))
@@ -120,4 +120,5 @@ if isY
 end
 xlim([8.4,9.7])
 ylim([332,436])
+xticks(0:0.5:20)
 end

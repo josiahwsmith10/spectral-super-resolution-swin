@@ -32,7 +32,7 @@ grid on
 legend("Periodogram","MUSIC","OMP",...,
     "cResFreq","SwinFreq","CVSwinFreq",...
     "Location","SW")
-xlabel("Frequency Separation Interval / Multiples of N")
+xlabel("Frequency Separation Interval")
 ylabel("Probability")
 xlim([separation(1),1])
 

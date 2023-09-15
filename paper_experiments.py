@@ -31,9 +31,9 @@ def main():
     experiment0(args)
     # experiment1(args)
     # experiment2(args)
-    experiment3(args)
+    # experiment3(args)
     # experiment4(args)
-    # experiment5(args)
+    experiment5(args)
 
 
 def setup():
@@ -163,7 +163,7 @@ def setup():
     parser.add_argument(
         "--exp5_data_path",
         type=str,
-        default="paper_results\paper_data\B727r.mat",
+        default="paper_results\paper_data\plane.mat",
         help="path for file to read for experiment 5",
     )
 

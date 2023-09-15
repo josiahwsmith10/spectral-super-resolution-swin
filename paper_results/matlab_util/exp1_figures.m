@@ -13,6 +13,7 @@ f1 = figure(100);
 clf(f1)
 h1 = create_figure_exp1(snr,cResFreq,SwinFreq,CVSwinFreq);
 ylabel("PSNR (dB)")
+% daspect([1,1,1])
 
 saveFigPng(h1,"exp1_psnr")
 
@@ -25,8 +26,9 @@ f2 = figure(101);
 clf(f2)
 h2 = create_figure_exp1(snr,cResFreq,SwinFreq,CVSwinFreq);
 ylabel("SSIM")
+% daspect([50,1,1])
 
-saveFigPng(h1,"exp1_ssim")
+saveFigPng(h2,"exp1_ssim")
 
 f1 = [f1,f2];
 h1 = [h1,h2];
