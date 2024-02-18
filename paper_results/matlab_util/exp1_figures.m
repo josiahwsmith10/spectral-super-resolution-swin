@@ -46,7 +46,7 @@ plot(h,snr,CVSwinFreq,LineStyle,"LineWidth",LineWidth)
 hold off
 legend("cResFreq","SwinFreq","CVSwinFreq",...
     "Location","SE")
-h.FontSize = 16;
+h.FontSize = 20;
 fontname(h,"Times New Roman")
 grid on
 xlabel("SNR (dB)")

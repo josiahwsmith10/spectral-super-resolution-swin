@@ -60,7 +60,7 @@ if ~isY
     yticklabels(h,[""])
 end
 
-h.FontSize = 16;
+h.FontSize = 20;
 end
 
 function h = create_figure_exp5_type2(A,isY)
@@ -91,5 +91,5 @@ if ~isY
     yticklabels(h,[""])
 end
 
-h.FontSize = 16;
+h.FontSize = 24;
 end

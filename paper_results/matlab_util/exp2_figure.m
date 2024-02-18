@@ -25,13 +25,13 @@ plot(h2,separation,cResFreq,LineStyle,"LineWidth",LineWidth)
 plot(h2,separation,SwinFreq,LineStyle',"LineWidth",LineWidth)
 plot(h2,separation,CVSwinFreq,LineStyle,"LineWidth",LineWidth)
 hold off
-h2.FontSize = 16;
+h2.FontSize = 20;
 fontname(h2,"Times New Roman")
 grid on
 
 legend("Periodogram","MUSIC","OMP",...,
     "cResFreq","SwinFreq","CVSwinFreq",...
-    "Location","SW")
+    "FontSize",12)
 xlabel("Frequency Separation Interval")
 ylabel("Probability")
 xlim([separation(1),1])

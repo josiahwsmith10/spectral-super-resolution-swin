@@ -22,8 +22,14 @@ for indSNR = 1:nSNR
         f_i = squeeze(f(indSample,:,indSNR));
         f_i = f_i(f_i ~= -10);
 
+        if snr(indSNR) == 0
+            mindB = -80;
+        elseif snr(indSNR) == 20
+            mindB = -120;
+        end
+
         create_figure_exp3(h3(indSample,indSNR),Periodogram_i,MUSIC_i,...
-            OMP_i,cResFreq_i,SwinFreq_i,CVSwinFreq_i,f_i);
+            OMP_i,cResFreq_i,SwinFreq_i,CVSwinFreq_i,f_i,mindB);
 
         saveFigPng(h3(indSample,indSNR),"exp3_SNR"+snr(indSNR)+"dB_"+indSample)
     end
@@ -31,10 +37,10 @@ end
 end
 
 function create_figure_exp3(h,Periodogram,MUSIC,OMP,cResFreq,SwinFreq,...
-    CVSwinFreq,f)
+    CVSwinFreq,f,mindB)
 Periodogram = normalize_exp3(Periodogram);
 MUSIC = normalize_exp3(MUSIC);
-OMP = normalize_exp3(OMP);
+OMP = normalize_exp3(OMP,mindB);
 cResFreq = normalize_exp3(cResFreq);
 SwinFreq = normalize_exp3(SwinFreq);
 CVSwinFreq = normalize_exp3(CVSwinFreq);
@@ -61,21 +67,20 @@ hold off
 
 legend("Periodogram","MUSIC","OMP",...,
     "cResFreq","SwinFreq","CVSwinFreq",...
-    "Location","SW")
-h.FontSize = 16;
+    "Location","SW","FontSize",12)
+h.FontSize = 20;
 fontname(h,"Times New Roman")
 grid on
 xlabel("f / Hz")
 ylabel("Normalized Power / dB")
 
 xlim([round(min(f)-0.02,2),round(max(f)+0.02,2)])
-ylim([-80,0])
+ylim([mindB,0])
 end
 
 function y = normalize_exp3(x,lower_thr)
-if nargin < 2
-    lower_thr = -100;
-end
 y = db(x/max(x(:)));
-y(y<lower_thr) = lower_thr;
+if nargin == 2
+    y(y<lower_thr) = lower_thr-10;
+end
 end
