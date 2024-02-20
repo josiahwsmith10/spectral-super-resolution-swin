@@ -12,8 +12,7 @@ def test_freq_SR(
     # Testing Model...
     print("Testing Model...")
     for noisy_signal, _, target_fr, freq in test_loader:
-        if args.use_cuda:
-            noisy_signal, target_fr = noisy_signal.cuda(), target_fr.cuda()
+        noisy_signal, target_fr = noisy_signal.to(args.device), target_fr.to(args.device)
         with torch.no_grad():
             output_fr = fr_module(noisy_signal)
         loss_fr = fr_criterion(output_fr, target_fr)
@@ -47,10 +46,9 @@ def test_basic_SR(fr_module, x: torch.Tensor, args):
         ), "Must be 2-D complex-valued or 3-D real-valued with layered I/Q"
 
     fr_module.eval()
-
-    if args.use_cuda and torch.cuda.is_available():
-        x = x.cuda()
-        fr_module = fr_module.cuda()
+    
+    # Move module and data to execution device
+    fr_module, x = fr_module.to(args.device), x.to(args.device)
 
     # If input dataset has fewer samples than batch_size
     if args.batch_size > x.shape[0]:

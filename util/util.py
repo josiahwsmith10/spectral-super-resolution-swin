@@ -3,6 +3,14 @@ import torch
 import modules
 
 
+def set_device(args):
+    if torch.cuda.is_available() and not args.no_cuda:
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+    return device
+
+
 def model_parameters(model):
     num_params = 0
     for param in model.parameters():
@@ -50,6 +58,8 @@ def load(checkpoint_path, device=torch.device("cuda")):
 
     if device == torch.device("cpu"):
         args.use_cuda = False
+    args.device = device
+    
     model = modules.select_model(args)
     model.load_state_dict(checkpoint["model"])
     optimizer, scheduler = set_optim(args, model)

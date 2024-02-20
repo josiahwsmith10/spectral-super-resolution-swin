@@ -1,3 +1,5 @@
+import torch
+
 from .DeepFreq import FrequencyRepresentationModule, PSnet
 from .cResFreq import FrequencyRepresentationModule_skiplayer32, cResFreqFast
 from .SwinFreq import SwinFreq, CVSwinFreq
@@ -106,7 +108,5 @@ def select_model(args):
         raise NotImplementedError(
             "Frequency representation module type not implemented"
         )
-    if args.use_cuda:
-        net.cuda()
 
-    return net
+    return net.to(args.device)

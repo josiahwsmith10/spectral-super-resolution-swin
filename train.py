@@ -397,10 +397,8 @@ def setup():
     if args.output_dir is None:
         args.output_dir = f"./checkpoint/{args.fr_module_type}_{datetime.now().strftime('%m-%d-%H%M')}"
 
-    if torch.cuda.is_available() and not args.no_cuda:
-        args.use_cuda = True
-    else:
-        args.use_cuda = False
+    # Determine if cuda should be used
+    args.device = util.set_device(args)
 
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)

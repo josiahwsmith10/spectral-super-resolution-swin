@@ -1,7 +1,7 @@
 import numpy as np
 
 import util
-from classical import Periodogram, MUSIC, OMP
+from classical import Periodogram, MUSIC, OMP, FISTA
 
 
 def is_ml_method(method):
@@ -58,6 +58,11 @@ def create_model(method, args):
             m=args.music_m,
             source_number_method=args.source_number_method,
             param=args.source_number_param,
+        )
+    elif method.lower() == "fista":
+        model = FISTA(
+            signal_dim=args.signal_dim,
+            fr_size=args.fr_size,
         )
     else:
         # method should be a path to a checkpoint

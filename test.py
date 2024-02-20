@@ -161,13 +161,8 @@ def setup():
 
     args = parser.parse_args()
 
-    # Determine if cuda can be used
-    if torch.cuda.is_available() and not args.no_cuda:
-        args.use_cuda = True
-    else:
-        args.use_cuda = False
-
-    return args
+    # Determine if cuda should be used
+    args.device = util.set_device(args)
 
 
 if __name__ == "__main__":

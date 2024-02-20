@@ -27,8 +27,7 @@ def train_freq_SR(
     fr_module.train()
     loss_train_fr = 0
     for clean_signal, target_fr, _ in train_loader:
-        if args.use_cuda:
-            clean_signal, target_fr = clean_signal.cuda(), target_fr.cuda()
+        clean_signal, target_fr = clean_signal.to(args.device), target_fr.to(args.device)
         noisy_signal = noise_torch(clean_signal, args=args)
         fr_optimizer.zero_grad()
         output_fr = fr_module(noisy_signal)
@@ -40,8 +39,7 @@ def train_freq_SR(
     fr_module.eval()
     loss_val_fr = 0
     for noisy_signal, _, target_fr, _ in val_loader:
-        if args.use_cuda:
-            noisy_signal, target_fr = noisy_signal.cuda(), target_fr.cuda()
+        noisy_signal, target_fr = noisy_signal.to(args.device), target_fr.to(args.device)
         with torch.no_grad():
             output_fr = fr_module(noisy_signal)
         loss_fr = fr_criterion(output_fr, target_fr)

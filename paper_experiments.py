@@ -12,6 +12,8 @@ import numpy as np
 import torch
 import argparse
 
+import util
+
 from paper_results import (
     create_methods,
     experiment0,
@@ -47,10 +49,10 @@ def setup():
         default=[
             "Periodogram",
             "MUSIC",
-            "OMP",
-            "saved/models/cresfreq.pth",
-            "saved/models/cvswinfreq222.pth",
-            "saved/models/swinfreq444.pth",
+            "FISTA",
+            #"saved/models/cresfreq.pth",
+            #"saved/models/cvswinfreq222.pth",
+            #"saved/models/swinfreq444.pth",
         ],
         help="methods to use (use path to checkpoint for ML models)",
     )
@@ -73,7 +75,7 @@ def setup():
     parser.add_argument(
         "--exp1_num_samples",
         type=int,
-        default=1000,
+        default=10,
         help="number of samples used in experiment 1 per SNR value",
     )
     parser.add_argument(
@@ -100,7 +102,7 @@ def setup():
         "--res_list",
         nargs="+",
         type=int,
-        default=np.linspace(0.3, 1.0, 100),
+        default=np.linspace(0.3, 1.0, 10),
         help="resolution spacing for computing resolution capability (x/N)",
     )
     parser.add_argument(
@@ -118,7 +120,7 @@ def setup():
     parser.add_argument(
         "--exp2_num_samples",
         type=int,
-        default=1000,
+        default=100,
         help="number of samples used in experiment 2 per resolution spacing",
     )
 
@@ -154,7 +156,7 @@ def setup():
     parser.add_argument(
         "--exp4_data_path",
         type=str,
-        default="paper_results\paper_data\spinningtarget.mat",
+        default="paper_results/paper_data/spinningtarget.mat",
         help="path for file to read for experiment 4",
     )
 
@@ -162,7 +164,7 @@ def setup():
     parser.add_argument(
         "--exp5_data_path",
         type=str,
-        default="paper_results\paper_data\plane.mat",
+        default="paper_results/paper_data/plane.mat",
         help="path for file to read for experiment 5",
     )
 
@@ -241,12 +243,8 @@ def setup():
 
     args = parser.parse_args()
 
-    if torch.cuda.is_available() and not args.no_cuda:
-        args.use_cuda = True
-        args.device = torch.device("cuda")
-    else:
-        args.use_cuda = False
-        args.device = torch.device("cpu")
+    # Determine if cuda should be used
+    args.device = util.set_device(args)
 
     # Seed numpy and pytorch
     np.random.seed(args.numpy_seed)
