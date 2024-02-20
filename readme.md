@@ -23,6 +23,7 @@ To get a local copy up and running follow these simple example steps.
 
 This is an example of how to list things you need to use the software and how to install them.
 * PyTorch
+
     PyTorch must be install using the CPU/GPU configuration desired prior to attempting to run the code.
 
 * requirements.txt
@@ -62,6 +63,6 @@ Distributed under the GPL-3.0 License. See `LICENSE.txt` for more information.
 
 Josiah W. Smith - josiah.radar@gmail.com
 
-Project Link: [https://https://github.com/josiahwsmith10/spectral-super-resolution-swin](https://https://github.com/josiahwsmith10/spectral-super-resolution-swin)
+Project Link: [https://github.com/josiahwsmith10/spectral-super-resolution-swin](https://github.com/josiahwsmith10/spectral-super-resolution-swin)
 
 
