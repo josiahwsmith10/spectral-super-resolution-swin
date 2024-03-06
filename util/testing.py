@@ -1,5 +1,7 @@
 import torch
 
+from tqdm import tqdm
+
 
 def test_freq_SR(
     args,
@@ -21,7 +23,7 @@ def test_freq_SR(
     return loss_test_fr
 
 
-def test_basic_SR(fr_module, x: torch.Tensor, args):
+def test_basic_SR(fr_module, x: torch.Tensor, args, quiet=True):
     """
     Tests a single tensor of complex-data. Returns the resulting tensor on the CPU
     after being passed through the model.
@@ -46,20 +48,23 @@ def test_basic_SR(fr_module, x: torch.Tensor, args):
         ), "Must be 2-D complex-valued or 3-D real-valued with layered I/Q"
 
     fr_module.eval()
-    
-    # Move module and data to execution device
-    fr_module, x = fr_module.to(args.device), x.to(args.device)
+    with torch.no_grad():
+        # Move module and data to execution device
+        fr_module = fr_module.to(args.device)
 
-    # If input dataset has fewer samples than batch_size
-    if args.batch_size > x.shape[0]:
-        return fr_module(x).detach().cpu()
+        # If input dataset has fewer samples than batch_size
+        if args.batch_size > x.shape[0]:
+            return fr_module(x).detach().cpu()
 
-    temp = fr_module(x[:2])
-    y_pred = torch.zeros(x.shape[0], temp.shape[1])
-
-    for i in range(0, x.shape[0], args.batch_size):
-        y_pred[i : i + args.batch_size] = (
-            fr_module(x[i : i + args.batch_size]).detach().cpu()
-        )
+        temp = fr_module(x[:2])
+        y_pred = torch.zeros(x.shape[0], temp.shape[1])
+        
+        if quiet:
+            range_func = range(0, x.shape[0], args.batch_size)
+        else:
+            range_func = tqdm(range(0, x.shape[0], args.batch_size))
+        for i in range_func:
+            xi = x[i : i + args.batch_size].to(args.device)
+            y_pred[i : i + args.batch_size] = fr_module(xi).detach().cpu()
 
     return y_pred

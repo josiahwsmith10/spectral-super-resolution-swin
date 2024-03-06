@@ -30,12 +30,12 @@ def main():
 
     create_methods(args)
 
-    experiment0(args)
-    experiment1(args)
-    experiment2(args)
+    #experiment0(args)
+    #experiment1(args)
+    #experiment2(args)
     experiment3(args)
-    experiment4(args)
-    experiment5(args)
+    #experiment4(args)
+    #experiment5(args)
 
 
 def setup():
@@ -50,9 +50,9 @@ def setup():
             "Periodogram",
             "MUSIC",
             "FISTA",
-            #"saved/models/cresfreq.pth",
-            #"saved/models/cvswinfreq222.pth",
-            #"saved/models/swinfreq444.pth",
+            "saved/models/cresfreq.pth",
+            "saved/models/cvswinfreq222.pth",
+            "saved/models/swinfreq444.pth",
         ],
         help="methods to use (use path to checkpoint for ML models)",
     )
@@ -75,7 +75,7 @@ def setup():
     parser.add_argument(
         "--exp1_num_samples",
         type=int,
-        default=10,
+        default=1000,
         help="number of samples used in experiment 1 per SNR value",
     )
     parser.add_argument(
@@ -102,7 +102,7 @@ def setup():
         "--res_list",
         nargs="+",
         type=int,
-        default=np.linspace(0.3, 1.0, 10),
+        default=np.linspace(0.3, 1.0, 100),
         help="resolution spacing for computing resolution capability (x/N)",
     )
     parser.add_argument(
@@ -120,7 +120,7 @@ def setup():
     parser.add_argument(
         "--exp2_num_samples",
         type=int,
-        default=100,
+        default=1000,
         help="number of samples used in experiment 2 per resolution spacing",
     )
 
@@ -141,7 +141,7 @@ def setup():
     parser.add_argument(
         "--exp3_num_samples",
         type=int,
-        default=2,
+        default=10,
         help="number of samples used in experiment 3 per SNR value",
     )
     parser.add_argument(

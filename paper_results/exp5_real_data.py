@@ -18,7 +18,7 @@ def get_results(args, data):
     results = {}
     for method, model in args.models.items():
         print(f"Computing SR line spectra for method={method}")
-        results[method] = util.test_basic_SR(model, data, args)
+        results[method] = util.test_basic_SR(model, data, args, quiet=False)
     return results
 
 

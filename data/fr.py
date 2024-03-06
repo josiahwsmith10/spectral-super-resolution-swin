@@ -312,6 +312,38 @@ def fista(D, X, reg=0.5, max_iter=3000, tol=1e-5):
         
     return Y_pred
 
+    
+def _fista_torch(A, b, reg, max_iter, tol, t0=None, x0=None, z0=None):
+    if t0 is None:
+        t = 1
+    else:
+        t = t0
+        
+    if x0 is None:
+        x = torch.zeros(A.shape[1], dtype=torch.cfloat, device=A.device)
+    else:
+        x = x0
+    
+    if z0 is None:
+        z = x.clone()
+    else:
+        z = z0
+    
+    L = torch.linalg.norm(A, ord=2) ** 2
+    
+    for _ in range(max_iter):
+        xold = x.clone()
+        z = z + A.H @ (b - A @ z) / L
+        x = soft_thresh_torch(z, reg / L)
+        t0 = t
+        t = (1. + np.sqrt(1.0 + 4.0 * t ** 2)) / 2.
+        z = x + ((t0 - 1.0) / t) * (x - xold)
+        loss = 0.5 * torch.linalg.norm(A @ x - b) ** 2 + reg * torch.linalg.norm(x, 1)
+        if loss < tol:
+            break
+
+    return x
+
 
 def fista_torch(D, X, reg=0.5, max_iter=10000, tol=1e-5):
     """Computes Fast Iterative Shrinkage Thresholding Algorithm using PyTorch
@@ -323,27 +355,6 @@ def fista_torch(D, X, reg=0.5, max_iter=10000, tol=1e-5):
     Outputs:
         Y_pred (torch.Tensor): (b, n) reconstructed signal
     """
-    
-    def _fista_torch(A, b, reg, max_iter, tol):
-        x = torch.zeros(A.shape[1], dtype=torch.cfloat, device=A.device)
-        
-        t = 1
-        z = x.clone()
-        
-        L = torch.linalg.norm(A) ** 2
-        
-        for _ in range(max_iter):
-            xold = x.clone()
-            z = z + A.H @ (b - A @z) / L
-            x = soft_thresh_torch(z, reg / L)
-            t0 = t
-            t = (1. + np.sqrt(1. + 4.0 * t ** 2)) / 2.
-            z = x + ((t0 - 1.0) / t) * (x - xold)
-            loss = 0.5 * torch.linalg.norm(A @ x - b) ** 2 + reg * torch.linalg.norm(x, 1)
-            if loss < tol:
-                break
-
-        return x
     
     b, m = X.shape
     _, n = D.shape
@@ -360,6 +371,63 @@ def fista_torch(D, X, reg=0.5, max_iter=10000, tol=1e-5):
             tol=tol
         )
         
+    return Y_pred
+
+
+def fista_torch_batch(D, B, reg=0.5, max_iter=10000, tol=1e-5):
+    """Computes Fast Iterative Shrinkage Thresholding Algorithm using PyTorch
+
+    Args:
+        D (torch.Tensor): (m, n) dictionary
+        X (torch.Tensor): (b, m) set of signals
+        
+    Outputs:
+        Y_pred (torch.Tensor): (b, n) reconstructed signal
+    """
+    
+    b, m = B.shape
+    _, n = D.shape
+    device = D.device
+    
+    x = torch.zeros(b, n, dtype=torch.cfloat, device=device)
+    Y_pred = x.clone()
+    
+    t = 1
+    z = x.clone()
+    
+    L = torch.linalg.norm(D, ord=2) ** 2
+    
+    i_list = np.arange(b)
+    
+    for i in range(max_iter):
+        xold = x.clone()
+        z = z + (B - z @ D.T) @ D.conj() / L
+        x = soft_thresh_torch(z, reg / L)
+        
+        t0 = t
+        t = (1. + np.sqrt(1.0 + 4.0 * t ** 2)) / 2.
+        
+        z = x + ((t0 - 1.0) / t) * (x - xold)
+        loss = 0.5 * torch.linalg.norm(x @ D.T - B, dim=1) ** 2 + reg * torch.linalg.norm(x, ord=1, dim=1)
+        
+        i_done_bool = loss < tol
+        i_done = i_list[i_done_bool]
+        
+        # Store completed values
+        Y_pred[i_done] = x[i_done_bool]
+        
+        # Update data under test
+        x = x[~i_done_bool]
+        z = z[~i_done_bool]
+        B = B[~i_done_bool]
+        i_list = i_list[~i_done_bool]
+        
+        if i_list.shape[0] == 1:
+            x = _fista_torch(D, B.flatten(), reg, max_iter-i, tol, t, x.flatten(), z.flatten())
+            break
+        
+    Y_pred[i_list] = x
+
     return Y_pred
 
 

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from data.fr import periodogram_torch, music_torch, omp_torch, fista_torch
+from data.fr import periodogram_torch, music_torch, omp_torch, fista_torch, fista_torch_batch
 from data.source_number_torch import sorte_arr_torch, mdl_arr_torch, aic_arr_torch
 
 
@@ -82,7 +82,7 @@ class OMP(nn.Module):
 
 
 class FISTA(nn.Module):
-    def __init__(self, signal_dim, fr_size, reg=0.5, max_iter=500, tol=1e-5):
+    def __init__(self, signal_dim, fr_size, reg=0.5, max_iter=100, tol=1):
         super().__init__()
 
         self.signal_dim = signal_dim
@@ -96,16 +96,9 @@ class FISTA(nn.Module):
         t = torch.arange(signal_dim).unsqueeze(1)
         self.D = nn.Parameter(torch.exp(1j * 2 * torch.pi * dict_freq * t))  # (signal_dim, fr_size)
 
-    def cuda(self):
-        super().cuda()
-
-        self.D = self.D.cuda()
-
-        return self
-
     def forward(self, x):
         x = x[:, 0] + 1j * x[:, 1]
 
-        y = fista_torch(self.D, x, self.reg, self.max_iter, self.tol)
+        y = fista_torch_batch(self.D, x, self.reg, self.max_iter, self.tol)
 
         return y.abs() / y.abs().max()
